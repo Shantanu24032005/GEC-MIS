@@ -1,16 +1,16 @@
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  Dimensions,
+  SafeAreaView,
+  StatusBar,
   StyleSheet,
   Text,
-  View,
   TextInput,
   TouchableOpacity,
-  StatusBar,
-  Dimensions,
-  SafeAreaView
+  View
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { useRouter } from 'expo-router';
 
 const { width, height } = Dimensions.get('window');
 
@@ -23,15 +23,15 @@ export default function LoginScreen() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
 
-      {/* Background SVG Shapes */}
+      
       <View style={styles.svgWrapper}>
         <Svg height={height} width={width}>
-          {/* Lighter blue background shape */}
+          
           <Path
             d={`M0,0 L${width},0 L${width},${height * 0.3} Q${width * 0.4},${height * 0.4} 0,${height * 0.25} Z`}
             fill="#8AB9E0"
           />
-          {/* Darker blue foreground shape */}
+         
           <Path
             d={`M0,0 L${width},0 L${width},${height * 0.2} Q${width * 0.5},${height * 0.35} 0,${height * 0.15} Z`}
             fill="#FFFFFF"
@@ -39,13 +39,13 @@ export default function LoginScreen() {
         </Svg>
       </View>
 
-      {/* Login Form Content */}
+      
       <View style={styles.contentContainer}>
         <Text style={styles.title}>Login</Text>
 
         <TextInput
           style={styles.input}
-          placeholder="stud23.vvd1@gec.ac.in"
+          placeholder="Email"
           placeholderTextColor="#F0F4F8"
           keyboardType="email-address"
           value={email}
@@ -55,9 +55,9 @@ export default function LoginScreen() {
 
         <TextInput
           style={styles.input}
-          placeholder="••••••••"
+          placeholder="Password"
           placeholderTextColor="#F0F4F8"
-          secureTextEntry // Hides the password input
+          secureTextEntry 
           value={password}
           onChangeText={setPassword}
         />
@@ -87,7 +87,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#5D9BCC', // Main blue background
+    backgroundColor: '#5D9BCC', 
   },
   svgWrapper: {
     position: 'absolute',

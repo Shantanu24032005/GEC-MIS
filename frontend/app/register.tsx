@@ -11,7 +11,7 @@ import {
   ScrollView
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { Ionicons } from '@expo/vector-icons'; // Used for reCAPTCHA logo
+import { Ionicons } from '@expo/vector-icons'; 
 import { useRouter } from 'expo-router';
 
 const { width, height } = Dimensions.get('window');
@@ -42,7 +42,7 @@ export default function RegisterScreen() {
           </Svg>
         </View>
 
-        {/* Register Form Content */}
+        
         <View style={styles.contentContainer}>
           <Text style={styles.title}>Sign Up</Text>
           <Text style={styles.subtitle}>Create a new account</Text>
@@ -87,7 +87,7 @@ export default function RegisterScreen() {
             onChangeText={setRegistrationType}
           />
 
-          {/* reCAPTCHA Placeholder */}
+          
           <View style={styles.recaptchaContainer}>
             <View style={styles.checkbox} />
             <Text style={styles.recaptchaText}>I'm not a robot</Text>
@@ -124,13 +124,13 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: 35,
-    paddingTop: 80, // Add padding to avoid header overlap
+    paddingTop: 80, 
     paddingBottom: 40,
   },
   title: {
     fontSize: 42,
     fontWeight: 'bold',
-    color: '#34495E', // Darker text for white background
+    color: '#34495E', 
     marginBottom: 5,
   },
   subtitle: {
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     fontSize: 16,
     color: '#FFFFFF',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)', // Slight transparency
+    backgroundColor: 'rgba(255, 255, 255, 0.2)', 
     marginBottom: 20,
   },
   recaptchaContainer: {

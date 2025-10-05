@@ -9,19 +9,19 @@ import {
   Dimensions
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { useRouter } from 'expo-router'; // 1. Import useRouter
+import { useRouter } from 'expo-router'; 
 
 const { width, height } = Dimensions.get('window');
 
-// Assuming you have the WelcomeScreen component here
+
 export default function WelcomeScreen() {
-  const router = useRouter(); // 2. Initialize the router
+  const router = useRouter(); 
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
 
-      {/* Background SVG Shapes */}
+      
       <View style={styles.svgWrapper}>
         <Svg height={height} width={width}>
           <Path
@@ -35,7 +35,7 @@ export default function WelcomeScreen() {
         </Svg>
       </View>
 
-      {/* Content */}
+     
       <View style={styles.contentContainer}>
         <View style={styles.headerSection}>
           <Image
@@ -57,10 +57,10 @@ export default function WelcomeScreen() {
         </View>
 
         <View style={styles.footerSection}>
-          {/* 3. Add onPress to navigate */}
+          
           <TouchableOpacity 
             style={styles.button}
-            // CORRECT
+            
       onPress={() => router.push('/login')}
           >
             <Text style={styles.buttonText}>Get Started</Text>
@@ -72,7 +72,7 @@ export default function WelcomeScreen() {
 }
 
 
-// Make sure your styles are here, they are unchanged
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     paddingBottom: '15%',
   },
   headerSection: {
-    // styles
+    
   },
   mainLogo: {
     width: 90,
