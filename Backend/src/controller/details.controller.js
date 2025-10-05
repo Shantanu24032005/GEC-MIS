@@ -16,8 +16,6 @@ async function getNotifications(req, res) {
   }
 }
 async function getStudentProfile(req, res) {
-  // Assuming req.user.id is set by an auth middleware
-  // This 'id' is the user's ID from the 'users' table
   const userId = req.user.id; 
 
   if (!userId) {
