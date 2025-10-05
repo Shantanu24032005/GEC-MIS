@@ -8,10 +8,11 @@ import {
   StatusBar,
   Dimensions,
   SafeAreaView,
-  ScrollView
+  ScrollView,
+  Alert
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { Ionicons } from '@expo/vector-icons'; 
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 const { width, height } = Dimensions.get('window');
@@ -23,6 +24,39 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [registrationType, setRegistrationType] = useState('');
   const router = useRouter();
+
+  const handleSignUp = async () => {
+    if (password !== confirmPassword) {
+      Alert.alert("Passwords don't match");
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:3000/api/auth/student/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fullname: fullName,
+          email: email,
+          password: password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert('Registration successful!');
+        router.push('/login');
+      } else {
+        Alert.alert('Registration failed', data.message);
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert('An error occurred during registration.');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -42,7 +76,7 @@ export default function RegisterScreen() {
           </Svg>
         </View>
 
-        
+
         <View style={styles.contentContainer}>
           <Text style={styles.title}>Sign Up</Text>
           <Text style={styles.subtitle}>Create a new account</Text>
@@ -87,16 +121,16 @@ export default function RegisterScreen() {
             onChangeText={setRegistrationType}
           />
 
-          
+
           <View style={styles.recaptchaContainer}>
             <View style={styles.checkbox} />
             <Text style={styles.recaptchaText}>I'm not a robot</Text>
             <Ionicons name="reload-circle" size={30} color="#5D9BCC" style={styles.recaptchaLogo} />
           </View>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.signUpButton}
-            onPress={() => router.push('/login')}
+            onPress={handleSignUp}
           >
             <Text style={styles.signUpButtonText}>Sign Up</Text>
           </TouchableOpacity>
@@ -124,13 +158,13 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: 35,
-    paddingTop: 80, 
+    paddingTop: 80,
     paddingBottom: 40,
   },
   title: {
     fontSize: 42,
     fontWeight: 'bold',
-    color: '#34495E', 
+    color: '#34495E',
     marginBottom: 5,
   },
   subtitle: {
@@ -146,7 +180,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     fontSize: 16,
     color: '#FFFFFF',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)', 
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     marginBottom: 20,
   },
   recaptchaContainer: {
@@ -188,4 +222,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-

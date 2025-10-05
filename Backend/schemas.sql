@@ -17,6 +17,7 @@ CREATE TABLE users (
   alt_email VARCHAR(120),
   pr_number VARCHAR(20),
   year_admission YEAR,
+  rollno VARCHAR(10) UNIQUE,
   program VARCHAR(100),
   current_semester ENUM('1','2','3','4','5','6','7','8'),
   batch CHAR(1),
