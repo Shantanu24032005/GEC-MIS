@@ -1,4 +1,4 @@
-
+import express from 'express'
 // Import both handlers from the controller
 import { registerStudent, loginStudent } from '../controller/auth.controller.js';
 
