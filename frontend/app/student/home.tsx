@@ -20,7 +20,7 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
-import notices from "../assets/notices.json";
+import notices from "../../assets/notices.json";
 
 const { width, height } = Dimensions.get("window");
 

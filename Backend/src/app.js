@@ -13,7 +13,7 @@ app.use(cors())
 app.use(cookieparser)
 
 //routes
-app.use('api/auth',authRoutes)
-app.use('api/details',detailsRoutes)
+app.use('/api/auth',authRoutes)
+app.use('/api/details',detailsRoutes)
 
 export default app;

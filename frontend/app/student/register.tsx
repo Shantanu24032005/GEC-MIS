@@ -12,7 +12,6 @@ import {
   Alert
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 const { width, height } = Dimensions.get('window');
@@ -121,13 +120,6 @@ export default function RegisterScreen() {
             onChangeText={setRegistrationType}
           />
 
-
-          <View style={styles.recaptchaContainer}>
-            <View style={styles.checkbox} />
-            <Text style={styles.recaptchaText}>I'm not a robot</Text>
-            <Ionicons name="reload-circle" size={30} color="#5D9BCC" style={styles.recaptchaLogo} />
-          </View>
-
           <TouchableOpacity
             style={styles.signUpButton}
             onPress={handleSignUp}
@@ -182,32 +174,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     marginBottom: 20,
-  },
-  recaptchaContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F0F4F8',
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 30,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderWidth: 2,
-    borderColor: '#BDBDBD',
-    borderRadius: 4,
-    marginRight: 15,
-  },
-  recaptchaText: {
-    fontSize: 16,
-    color: '#333',
-    flex: 1,
-  },
-  recaptchaLogo: {
-    opacity: 0.7
   },
   signUpButton: {
     borderWidth: 1.5,
