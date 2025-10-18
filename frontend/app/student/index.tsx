@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useRouter } from 'expo-router'; 
+import "/frontend/assets/gecmis-logo.png"
 
 const { width, height } = Dimensions.get('window');
 
@@ -61,7 +62,7 @@ export default function WelcomeScreen() {
           <TouchableOpacity 
             style={styles.button}
             
-      onPress={() => router.push('/login')}
+      onPress={() => router.push('./login.tsx')}
           >
             <Text style={styles.buttonText}>Get Started</Text>
           </TouchableOpacity>
