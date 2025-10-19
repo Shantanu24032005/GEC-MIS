@@ -69,6 +69,52 @@ export const getProfile = async (req, res) => {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
-export const resetPassword=async(req,res)=>{
+export const resetPassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword, confirmPassword } = req.body;
+    const userId = req.user?._id; // From protectAll middleware
+    const isStudent = !!req.student?._id; // Check if the logged-in user is a student
 
-}
+    // 1. Validation
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({ message: 'Please provide old password, new password, and confirmation' });
+    }
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: 'New passwords do not match' });
+    }
+
+    // 2. Find the user (could be Student or Admin)
+    let user;
+    if (isStudent) {
+      user = await Student.findById(userId);
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+      }
+    } else {
+      user = await Admin.findById(userId);
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: 'Password must be at least 8 characters long' });
+      }
+    }
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // 3. Check if old password is correct
+    const isMatch = await user.comparePassword(oldPassword);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid old password' });
+    }
+
+    // 4. Set new password and save
+    user.password = newPassword;
+    await user.save(); // pre-save hook in the model will automatically hash the new password
+
+    res.status(200).json({ message: 'Password changed successfully' });
+
+  } catch (error) {
+    console.error("Change Password Error:", error);
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};
