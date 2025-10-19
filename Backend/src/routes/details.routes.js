@@ -1,12 +1,10 @@
 import express from 'express';
-import { getNotifications, getStudentProfile } from '../controller/details.controller.js';
-import { studentMiddleware } from '../middleware/student.middleware.js';
-
+import { getStudentDetails } from '../controller/details.controller.js';
+import { protectAll } from '../middleware/auth.middleware.js'; // Using the general middleware
 
 const router = express.Router();
 
-router.get('student/home',studentMiddleware,getNotifications)
+// Route specifically for student details, protected by the general middleware
+router.get('/student', protectAll, getStudentDetails);
 
-router.get('student/profile',studentMiddleware,getStudentProfile)
-
-export default router
+export default router;

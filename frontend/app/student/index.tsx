@@ -9,8 +9,8 @@ import {
   Dimensions
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { useRouter } from 'expo-router'; 
-import "/frontend/assets/gecmis-logo.png"
+import { useRouter } from 'expo-router';
+// Removed incorrect asset import
 
 const { width, height } = Dimensions.get('window');
 
@@ -40,14 +40,16 @@ export default function WelcomeScreen() {
       <View style={styles.contentContainer}>
         <View style={styles.headerSection}>
           <Image
-            source={require('../assets/gecmis-logo.png')}
+            // CORRECTED: Changed path from ../assets to ../../assets
+            source={require('../../assets/gecmis-logo.png')}
             style={styles.mainLogo}
             resizeMode="contain"
           />
           <View style={styles.titleWrapper}>
             <Text style={styles.title}>GEC's</Text>
             <Image
-              source={require('../assets/gec-seal.png')}
+              // CORRECTED: Changed path from ../assets to ../../assets
+              source={require('../../assets/gec-seal.png')}
               style={styles.sealLogo}
               resizeMode="contain"
             />
@@ -62,7 +64,8 @@ export default function WelcomeScreen() {
           <TouchableOpacity 
             style={styles.button}
             
-      onPress={() => router.push('./login.tsx')}
+            // CORRECTED: Changed file path to route name
+            onPress={() => router.push('/student/login')}
           >
             <Text style={styles.buttonText}>Get Started</Text>
           </TouchableOpacity>

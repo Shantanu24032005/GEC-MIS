@@ -1,22 +1,15 @@
-import app from "./src/app.js"
-import db from "./src/config/db.js";
-import dotenv from "dotenv"
+import app from './src/app.js';
+import dotenv from 'dotenv';
+import connectDB from './src/config/db.js';
+
+// Load environment variables
 dotenv.config();
 
-//routes
+const PORT = process.env.PORT;
 
-
-//db connection
-db.connect(err => {
-  if (err) {
-    console.error(err);
-    return;
-  }
-  console.log('✅ Connected to MySQL database');
+// Connect to Database
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
 });
-
-
-
-app.listen(3000,()=>{
-   console.log('connected to server')
-})

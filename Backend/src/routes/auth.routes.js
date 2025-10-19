@@ -1,13 +1,13 @@
+// src/routes/auth.routes.js
 import express from 'express';
-// Import both handlers from the controller
-import { registerStudent, loginStudent } from '../controller/auth.controller.js';
+import { register, login, logout } from '../controller/auth.controller.js';
+import upload from '../middleware/upload.js'; // <-- Import multer config
 
 const router = express.Router();
 
-// Registration route
-router.post('/student/register', registerStudent);
-
-// Add the new login route
-router.post('/student/login', loginStudent);
+// Add the middleware here. 'image' is the field name from the frontend.
+router.post('/register', upload.single('image'), register); // <-- MODIFIED
+router.post('/login', login);
+router.post('/logout', logout);
 
 export default router;

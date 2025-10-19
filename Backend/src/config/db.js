@@ -1,10 +1,16 @@
-import mysql from "mysql2"
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
-const db=mysql.createConnection({
-  host: 'localhost',
-   port:"3306",
-  user: 'root',      // default user in XAMPP
-  password: '',      // leave blank unless you set a password
-  database: 'MIS' // your database name
-})
-export default db
+dotenv.config();
+
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGO_URI);
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
+  } catch (error) {
+    console.error(`Error connecting to MongoDB: ${error.message}`);
+    process.exit(1); // Exit process with failure
+  }
+};
+
+export default connectDB;

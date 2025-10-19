@@ -67,7 +67,8 @@ export default function LoginScreen() {
             <Text style={styles.linkText}>Forgot Password?</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.loginButton}>
-            <Text style={styles.loginButtonText} onPress={() => router.push('/home')} >Login</Text>
+            {/* CORRECTED: Changed absolute path to relative route */}
+            <Text style={styles.loginButtonText} onPress={() => router.push('home')} >Login</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -75,8 +76,9 @@ export default function LoginScreen() {
       <View style={styles.footer}>
         <Text style={styles.footerText}>New admission ? </Text>
         <TouchableOpacity>
+          {/* CORRECTED: Changed absolute path to relative route */}
           <Text style={[styles.footerText, styles.linkText]}
-                 onPress={() => router.push('/register')}
+                 onPress={() => router.push('/student/register')}
           >Sign Up</Text>
         </TouchableOpacity>
       </View>

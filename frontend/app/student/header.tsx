@@ -28,7 +28,8 @@ const Header = () => {
         .replace(/\b\w/g, (l: string) => l.toUpperCase()) // Added type annotation
     : 'Home';
 
-  const isHomeOrProfile = pathname === '/home' || pathname === '/profile' || pathname === '/';
+  // CORRECTED: Checked against the full pathnames from the (student) group
+  const isHomeOrProfile = pathname === '/student' || pathname === '/student/home' || pathname === '/student/profile';
 
   return (
     <View style={styles.headerContainer}>

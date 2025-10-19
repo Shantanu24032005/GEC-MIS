@@ -17,7 +17,7 @@ import {
 const { width, height } = Dimensions.get('window');
 
 // This is the background image, you should place your own image here
-const backgroundImage = require('../assets/image_bfba9e.jpg');
+const backgroundImage = require('../../assets/image_bfba9e.jpg');
 
 export default function ResetPasswordScreen() {
   const [newPassword, setNewPassword] = useState('');

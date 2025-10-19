@@ -25,28 +25,30 @@ import notices from "../../assets/notices.json";
 const { width, height } = Dimensions.get("window");
 
 // Define a type for your routes to fix the TypeScript error
+// CORRECTED: Removed leading slashes to use relative routing
 type AppRoutes = 
-  | '/home'
-  | '/profile'
-  | '/registration-status'
-  | '/internal-marks'
-  | '/reset-password'
-  | '/semester-result'
-  | '/payments'
-  | '/info'
-  | '/contact-us'
-  | '/be-admission'
-  | '/me-admission';
+  | 'home'
+  | 'profile'
+  | 'registration-status'
+  | 'internal-marks'
+  | 'reset-password'
+  | 'semester-result'
+  | 'payments'
+  | 'info'
+  | 'contact-us'
+  | 'be-admission'
+  | 'me-admission';
 
 // Sidebar menu items data with routes
+// CORRECTED: Removed leading slashes from routes
 const sidebarMenuItems = [
-  { icon: "home", name: "Home", route: "/home" },
-  { icon: "user", name: "Profile", route: "/profile" },
-  { icon: "book-open", name: "Registration", route: "/registration-status" },
-  { icon: "calendar", name: "Internal Marks", route: "/internal-marks" },
-  { icon: "settings", name: "Reset Password", route: "/reset-password" },
-  { icon: "award", name: "Semester Result", route: "/semester-result" },
-  { icon: "dollar-sign", name: "My Payments", route: "/payments" },
+  { icon: "home", name: "Home", route: "home" },
+  { icon: "user", name: "Profile", route: "profile" },
+  { icon: "book-open", name: "Registration", route: "registration-status" },
+  { icon: "calendar", name: "Internal Marks", route: "internal-marks" },
+  { icon: "settings", name: "Reset Password", route: "reset-password" },
+  { icon: "award", name: "Semester Result", route: "semester-result" },
+  { icon: "dollar-sign", name: "My Payments", route: "payments" },
 ];
 
 export default function HomeScreen() {
@@ -67,10 +69,11 @@ export default function HomeScreen() {
 
   const handleLogout = () => {
     toggleSidebar(false);
-    router.replace("/login");
+    // CORRECTED: Changed absolute path to relative route
+    router.replace("login");
   };
 
-  // FIX: Added type assertion 'as AppRoutes' to fix the error
+  // This function is now correct because AppRoutes and sidebarMenuItems are corrected
   const handleMenuItemPress = (route: string) => {
     toggleSidebar(false);
     setTimeout(() => {
@@ -122,11 +125,13 @@ export default function HomeScreen() {
           >
             {/* Sidebar Top Section - Graduation Background */}
             <ImageBackground
-              source={require("../assets/image_cf3603.jpg")}
+              // CORRECTED: Changed path from ../assets to ../../assets
+              source={require("../../assets/image_cf3603.jpg")}
               style={styles.sidebarTopSection}
             >
               <View style={styles.profileInfoWrapper}>
-                <TouchableOpacity onPress={() => handleMenuItemPress('/profile')}>
+                {/* CORRECTED: Use relative route name */}
+                <TouchableOpacity onPress={() => handleMenuItemPress('profile')}>
                   <Image
                     source={{ uri: "https://placehold.co/100x100/E57373/FFFFFF?text=DS" }}
                     style={styles.profilePic}
@@ -277,7 +282,8 @@ export default function HomeScreen() {
           <View style={styles.admissionsSection}>
             <TouchableOpacity
               style={styles.admissionCard}
-              onPress={() => router.push("/be-admission")}
+              // CORRECTED: Changed absolute path to relative route
+              onPress={() => router.push("be-admission")}
             >
               <ImageBackground
                 source={{
@@ -294,7 +300,8 @@ export default function HomeScreen() {
                 />
                 <View style={styles.cardContent}>
                   <Image
-                    source={require("../assets/gec-seal.png")}
+                    // CORRECTED: Changed path from ../assets to ../../assets
+                    source={require("../../assets/gec-seal.png")}
                     style={styles.cardLogo}
                   />
                   <View style={styles.cardTextContainer}>
@@ -311,7 +318,8 @@ export default function HomeScreen() {
 
             <TouchableOpacity
               style={styles.admissionCard}
-              onPress={() => router.push("/me-admission")}
+              // CORRECTED: Changed absolute path to relative route
+              onPress={() => router.push("me-admission")}
             >
               <ImageBackground
                 source={{
@@ -328,7 +336,8 @@ export default function HomeScreen() {
                 />
                 <View style={styles.cardContent}>
                   <Image
-                    source={require("../assets/gec-seal.png")}
+                    // CORRECTED: Changed path from ../assets to ../../assets
+                    source={require("../../assets/gec-seal.png")}
                     style={styles.cardLogo}
                   />
                   <View style={styles.cardTextContainer}>
@@ -388,6 +397,7 @@ export default function HomeScreen() {
   );
 }
 
+// ... (styles remain unchanged)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -716,4 +726,4 @@ const styles = StyleSheet.create({
     color: "#555",
     lineHeight: 24,
   },
-}); 
+});

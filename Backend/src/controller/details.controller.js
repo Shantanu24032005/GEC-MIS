@@ -1,70 +1,43 @@
-import db from '../config/db.js'; 
+import Student from '../models/student.model.js';
+import Academic from '../models/academic.model.js';
+import Fee from '../models/fee.model.js';
+import Department from '../models/department.model.js'; // Keep this if you need HoD
 
-async function getNotifications(req, res) {
+export const getStudentDetails = async (req, res) => {
   try {
-    const [notifications] = await db.query(
-      'SELECT * FROM notifications ORDER BY created_at DESC'
-    );
+    const studentId = req.student?._id;
 
-    return res.status(200).json(notifications);
-
-  } catch (error) {
-    console.error('Error fetching notifications:', error);
-    return res.status(500).json({
-      message: 'Internal server error.',
-    });
-  }
-}
-async function getStudentProfile(req, res) {
-  const userId = req.user.id; 
-
-  if (!userId) {
-    return res.status(401).json({ message: 'Not authorized, user ID not found in request.' });
-  }
-
-  try {
-    const [profileData] = await db.query(
-      `
-      SELECT
-          u.name AS fullname,
-          s.student_id,
-          p.name AS program_name,
-          s.current_year,
-          s.current_sem,
-          s.roll_no,
-          s.class,
-          s.batch,
-          s.pr_number,
-          m.name AS mentor_name,
-          s.alt_email
-      FROM
-          users u
-      JOIN
-          students s ON u.id = s.user_id
-      LEFT JOIN
-          programs p ON s.program_id = p.id
-      LEFT JOIN
-          mentors m ON s.mentor_id = m.id
-      WHERE
-          u.id = ?
-      `,
-      [userId]
-    );
-
-    if (profileData.length === 0) {
-      return res.status(404).json({ message: 'Student profile not found.' });
+    if (!studentId) {
+        return res.status(403).json({ message: 'Forbidden: User is not a student or ID not found' });
     }
 
-    const studentProfile = profileData[0];
+    // REMOVED .populate() for department
+    const student = await Student.findById(studentId).select('-password');
 
-    return res.status(200).json(studentProfile);
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    // **Optional:** Fetch department details separately if needed (e.g., for HoD)
+    let departmentDetails = null;
+    if (student.department_name) {
+        departmentDetails = await Department.findOne({ name: student.department_name }).select('head_of_department'); // Select only needed fields
+    }
+
+    const academics = await Academic.find({ student_id: studentId }).sort({ semester: 1 });
+    const fees = await Fee.find({ student_id: studentId }).sort({ payment_date: -1 });
+
+    res.json({
+      details: {
+          ...student.toObject(), // Spread student details
+          head_of_department: departmentDetails?.head_of_department || null // Add HoD if found
+      },
+      academics,
+      fees,
+    });
 
   } catch (error) {
-    console.error('Error fetching student profile:', error);
-    return res.status(500).json({
-      message: 'Internal server error.',
-    });
+    console.error("Get Student Details Error:", error);
+    res.status(500).json({ message: 'Server Error', error: error.message });
   }
-}
-
-export { getNotifications,getStudentProfile };
+};
