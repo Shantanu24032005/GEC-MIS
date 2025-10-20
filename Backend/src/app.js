@@ -25,8 +25,10 @@ app.use(cookieParser());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/details', detailsRoutes);
+
 app.use('/api/adminauth',adminAuthRoutes)
 app.use('/api/adminDetails',adminDetailsRoutes)
+
 
 
 app.get("/", (req, res) => {
