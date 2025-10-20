@@ -10,8 +10,6 @@ const storage = new CloudinaryStorage({
     // Determine the folder on Cloudinary
     const folder = 'gec-mis/student-images';
 
-    // Create a unique public_id (filename)
-    // Example: 'image-1678886400000'
     const public_id = `${file.fieldname}-${Date.now()}`;
 
     return {

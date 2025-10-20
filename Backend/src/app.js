@@ -31,8 +31,4 @@ app.use('/api/adminDetails',adminDetailsRoutes)
 
 
 
-app.get("/", (req, res) => {
-    res.send("GEC MIS API is running...");
-});
-
 export default app;

@@ -1,5 +1,5 @@
 import express from 'express';
-import { getStudentDetails,getProfile,resetPassword } from '../controller/details.controller.js';
+import { getStudentDetails,getProfile,resetPassword, getResultDetails, getFeeDetails } from '../controller/details.controller.js';
 import { protectAll } from '../middleware/auth.middleware.js'; // Using the general middleware
 import { getAllNotices } from '../controller/notice.controller.js';
 
@@ -10,6 +10,8 @@ router.get('/student', protectAll, getStudentDetails);
 router.get('/profile',protectAll,getProfile)
 router.put('/resetpassword',protectAll,resetPassword)
 router.get('/home',protectAll,getAllNotices)
+router.get('/getResult',protectAll,getResultDetails)
+router.get('/getFeeeDetails',protectAll,getFeeDetails)
 
 
 export default router;
