@@ -17,11 +17,14 @@ const generateTokenAndSetCookie = (adminId, adminRole, res) => {
 };
 export const adminRegister = async (req, res) => {
   try {
-    const { username, email, password, role, department_id } = req.body;
-    if (!username || !email || !password || !role) {
+    const { username, email, password, role, department_id, admin_secret } = req.body;
+    if (!username || !email || !password || !role||!admin_secret) {
       return res
         .status(400)
         .json({ message: 'Missing required fields: username, email, password, role.' });
+    }
+    if (admin_secret !== process.env.ADMIN_SECRET) {
+      return res.status(401).json({ error: "unauthorised admin secret" }); // Use 401 Unauthorized status
     }
     const existingAdmin = await Admin.findOne({
       $or: [{ username: username.toLowerCase() }, { email: email.toLowerCase() }],
