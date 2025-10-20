@@ -2,7 +2,7 @@ import express from "express";
 
 import {addStudentDetails, studentDetailsForAdmin, updateStudentDetails} from '../controller/adminDetails.controller.js'
 import { protectAdmin } from "../middleware/protectAdmin.js";
-import { createNotice, deleteNotice, updateNotice, viewNotice } from "../controller/notice.controller.js";
+import { createNotice, deleteNotice, getAllNotices, updateNotice} from "../controller/notice.controller.js";
 
 
 const router=express.Router();
@@ -12,7 +12,7 @@ router.post ('/addStudentDetails',protectAdmin,addStudentDetails)
 router.patch('/updateStudentDetails', protectAdmin, updateStudentDetails);
 
 router.post('/createNotice',protectAdmin,createNotice)
-router.get('/viewNotice',protectAdmin,viewNotice)
+router.get('/viewNotice',protectAdmin,getAllNotices)
 router.put('/updateNotice',protectAdmin,updateNotice)
 router.delete('/deleteNotice',protectAdmin,deleteNotice)
 
