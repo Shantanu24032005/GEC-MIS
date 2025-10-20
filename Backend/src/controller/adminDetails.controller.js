@@ -65,3 +65,6 @@ export const studentDetailsForAdmin = async (req, res) => {
         });
     }
 };
+export const addStudentDetails=()=>{
+    
+}
