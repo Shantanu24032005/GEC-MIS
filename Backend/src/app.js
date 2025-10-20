@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.routes.js';
 import detailsRoutes from './routes/details.routes.js';
 import adminAuthRoutes from './routes/adminauth.routes.js'
+import adminDetailsRoutes from './routes/adminDetails.routes.js'
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 app.use('/api/details', detailsRoutes);
 app.use('/api/adminauth',adminAuthRoutes)
+app.use('/api/adminDetails',adminDetailsRoutes)
 
 
 app.get("/", (req, res) => {
