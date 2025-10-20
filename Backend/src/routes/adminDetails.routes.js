@@ -1,12 +1,13 @@
 import express from "express";
 
-import {addStudentDetails, studentDetailsForAdmin} from '../controller/adminDetails.controller.js'
+import {addStudentDetails, studentDetailsForAdmin, updateStudentDetails} from '../controller/adminDetails.controller.js'
 import { protectAdmin } from "../middleware/protectAdmin.js";
 
 
 const router=express.Router();
 
 router.get('/studentDetails',protectAdmin,studentDetailsForAdmin)
-router.put('/addStudentDetails',protectAdmin,addStudentDetails)
+router.post ('/addStudentDetails',protectAdmin,addStudentDetails)
+router.patch('/updateStudentDetails', protectAdmin, updateStudentDetails);
 
 export default router
