@@ -11,7 +11,7 @@ router.get('/profile',protectAll,getProfile)
 router.put('/resetpassword',protectAll,resetPassword)
 router.get('/home',protectAll,getAllNotices)
 router.get('/getResult',protectAll,getResultDetails)
-router.get('/getFeeeDetails',protectAll,getFeeDetails)
+router.get('/getFeeDetails',protectAll,getFeeDetails)
 
 
 export default router;

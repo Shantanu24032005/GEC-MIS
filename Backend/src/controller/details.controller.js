@@ -118,9 +118,53 @@ export const resetPassword = async (req, res) => {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
-export const getFeeDetails=()=>{
+export const getFeeDetails = async (req, res) => {
+  try {
+    // Build query object based on request query parameters
+    const query = {
+      student_id: req.student._id
+    };
+    if (req.query.payment_for) {
+      query.payment_for = req.query.payment_for;
+    }
+    if (req.query.status) {
+      query.status = req.query.status;
+    }
 
-}
-export const getResultDetails=()=>{
-  
-}
+    const feeDetails = await Fee.find(query);
+
+    if (!feeDetails || feeDetails.length === 0) {
+      return res.status(404).json({
+        message: "No fee details found for the specified criteria"
+      });
+    }
+
+    res.status(200).json(feeDetails);
+  } catch (error) {
+    console.error("Error fetching fee details:", error);
+    res.status(500).json({
+      message: "Internal server error"
+    });
+  }
+};
+export const getResultDetails = async (req, res) => {
+  try {
+    const academicRecord = await Academic.findOne({
+      student_id: req.student._id,
+    });
+
+    if (!academicRecord || !academicRecord.academics) {
+      return res.status(404).json({
+        message: "Result not found"
+      });
+    }
+
+    // Return the array of semester results
+    res.status(200).json(academicRecord.academics);
+  } catch (error) {
+    console.error("Error fetching result details:", error);
+    res.status(500).json({
+      message: "Internal server error"
+    });
+  }
+};

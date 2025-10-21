@@ -1,154 +1,129 @@
-import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import {
-  Dimensions,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
-} from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { useRouter } from 'expo-router';
+import axios from 'axios'; 
 
-const { width, height } = Dimensions.get('window');
-
-export default function LoginScreen() {
+const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false); // State for loading indicator
   const router = useRouter();
 
+  const handleLogin = async () => {
+    // Basic validation
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter both email and password.');
+      return;
+    }
+     // Email format validation (basic)
+    if (!/\S+@\S+\.\S+/.test(email)) {
+        Alert.alert('Error', 'Please enter a valid email address.');
+        return;
+    }
+
+    setLoading(true); // Start loading
+
+    try {
+      // Prepare the payload { email, password }
+      const payload = {
+        email: email,
+        password: password
+      };
+
+      // Call the login API
+      const response = await axios.post('http://localhost:3000/api/auth/login', payload, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      // Handle successful login
+      console.log('Login successful:', response.data);
+      Alert.alert('Success', 'Login successful!');
+
+      // Redirect to home.tsx (assuming path '/student/home')
+      router.push('/student/home');
+
+      // Optional: Store authentication token if provided by the API
+      // if (response.data.token) {
+      //   // Use AsyncStorage or secure storage
+      //   console.log('Token received:', response.data.token);
+      // }
+
+    } catch (error: any) {
+      // Handle login errors
+      console.error('Login failed:', error);
+      let errorMessage = 'Login failed. Please check your credentials and try again.';
+      // Use specific backend error message if available
+      if (axios.isAxiosError(error) && error.response && error.response.data && error.response.data.message) {
+        errorMessage = error.response.data.message;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      Alert.alert('Error', errorMessage);
+    } finally {
+      setLoading(false); // Stop loading
+    }
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" />
-
-      
-      <View style={styles.svgWrapper}>
-        <Svg height={height} width={width}>
-          
-          <Path
-            d={`M0,0 L${width},0 L${width},${height * 0.3} Q${width * 0.4},${height * 0.4} 0,${height * 0.25} Z`}
-            fill="#8AB9E0"
-          />
-         
-          <Path
-            d={`M0,0 L${width},0 L${width},${height * 0.2} Q${width * 0.5},${height * 0.35} 0,${height * 0.15} Z`}
-            fill="#FFFFFF"
-          />
-        </Svg>
-      </View>
-
-      
-      <View style={styles.contentContainer}>
-        <Text style={styles.title}>Login</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#F0F4F8"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#F0F4F8"
-          secureTextEntry 
-          value={password}
-          onChangeText={setPassword}
-        />
-
-        <View style={styles.actionsContainer}>
-          <TouchableOpacity>
-            <Text style={styles.linkText}>Forgot Password?</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.loginButton}>
-            {/* CORRECTED: Changed absolute path to relative route */}
-            <Text style={styles.loginButtonText} onPress={() => router.push('home')} >Login</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-      
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>New admission ? </Text>
-        <TouchableOpacity>
-          {/* CORRECTED: Changed absolute path to relative route */}
-          <Text style={[styles.footerText, styles.linkText]}
-                 onPress={() => router.push('/student/register')}
-          >Sign Up</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <Text style={styles.title}>Student Login</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry // Hide password input
+      />
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" style={styles.loader}/>
+      ) : (
+        <Button title="Login" onPress={handleLogin} />
+      )}
+       <View style={styles.buttonSpacer} />
+       {/* Button to navigate to registration */}
+       <Button title="Register" onPress={() => router.push('/student/register')} />
+    </View>
   );
-}
+};
 
+// Styles remain unchanged - keeping the original UI theme
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#5D9BCC', 
-  },
-  svgWrapper: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-  },
-  contentContainer: {
-    flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 35,
+    padding: 20,
+    backgroundColor: '#F5FCFF', // Original theme color
   },
   title: {
-    fontSize: 42,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginBottom: 40,
+    marginBottom: 20,
+    textAlign: 'center',
   },
   input: {
-    borderWidth: 1.5,
-    borderColor: '#FFFFFF',
-    borderRadius: 12,
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    fontSize: 16,
-    color: '#FFFFFF',
-    marginBottom: 20,
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 12,
+    paddingHorizontal: 10,
+    borderRadius: 5,
   },
-  actionsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 10,
+  loader: {
+    marginVertical: 10,
   },
-  linkText: {
-    color: '#FFFFFF',
-    fontWeight: '500',
-    fontSize: 15,
-  },
-  loginButton: {
-    borderWidth: 1.5,
-    borderColor: '#FFFFFF',
-    borderRadius: 12,
-    paddingVertical: 15,
-    paddingHorizontal: 50,
-  },
-  loginButtonText: {
-    fontSize: 18,
-    color: '#FFFFFF',
-    fontWeight: '500',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingBottom: 40,
-  },
-  footerText: {
-    fontSize: 15,
-    color: '#F0F4F8',
-  },
+   buttonSpacer: {
+      height: 10,
+  }
 });
+
+export default LoginScreen;

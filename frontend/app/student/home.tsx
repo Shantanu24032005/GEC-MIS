@@ -42,13 +42,13 @@ type AppRoutes =
 // Sidebar menu items data with routes
 // CORRECTED: Removed leading slashes from routes
 const sidebarMenuItems = [
-  { icon: "home", name: "Home", route: "home" },
-  { icon: "user", name: "Profile", route: "profile" },
-  { icon: "book-open", name: "Registration", route: "registration-status" },
-  { icon: "calendar", name: "Internal Marks", route: "internal-marks" },
-  { icon: "settings", name: "Reset Password", route: "reset-password" },
-  { icon: "award", name: "Semester Result", route: "semester-result" },
-  { icon: "dollar-sign", name: "My Payments", route: "payments" },
+  { icon: "home", name: "Home", route: "student/home" },
+  { icon: "user", name: "Profile", route: "student/profile" },
+  { icon: "book-open", name: "Registration", route: "student/registration-status" },
+  { icon: "calendar", name: "Internal Marks", route: "student/internal-marks" },
+  { icon: "settings", name: "Reset Password", route: "student/reset-password" },
+  { icon: "award", name: "Semester Result", route: "student/semester-result" },
+  { icon: "dollar-sign", name: "My Payments", route: "<student />payments" },
 ];
 
 export default function HomeScreen() {

@@ -41,7 +41,7 @@ export default function WelcomeScreen() {
         <View style={styles.headerSection}>
           <Image
             // CORRECTED: Changed path from ../assets to ../../assets
-            source={require('../../assets/gecmis-logo.png')}
+            source={require('../assets/gecmis-logo.png')}
             style={styles.mainLogo}
             resizeMode="contain"
           />
@@ -49,7 +49,7 @@ export default function WelcomeScreen() {
             <Text style={styles.title}>GEC's</Text>
             <Image
               // CORRECTED: Changed path from ../assets to ../../assets
-              source={require('../../assets/gec-seal.png')}
+              source={require('../assets/gec-seal.png')}
               style={styles.sealLogo}
               resizeMode="contain"
             />
