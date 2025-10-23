@@ -78,10 +78,14 @@ export const addStudentDetails = async (req, res, next) => {
             paymentDate,
             transactionId,
             feeStatus,
+            payment_for,
+            payment_method,
+            remarks,
             // Academic details
             semester,
             cgpa,
-            backlogs
+            academic_year,
+            courses // Array of course details
         } = req.body;
 
         if (!roll_no) {
@@ -91,7 +95,7 @@ export const addStudentDetails = async (req, res, next) => {
                 message: "Roll number (roll_no) is required"
             });
         }
-        const student = await Student.findOne({ roll_no });
+        const student = await Student.findOne({ roll_number: roll_no });
         if (!student) {
              // Send a 404 Not Found response
             return res.status(404).json({
@@ -100,30 +104,51 @@ export const addStudentDetails = async (req, res, next) => {
             });
         }
         let feeData = null;
-        if (amount !== undefined || paymentDate || transactionId || feeStatus) {
-            if (amount === undefined || !paymentDate || !transactionId || !feeStatus) {
-                 console.warn(`Incomplete fee details for roll_no ${roll_no}. Fee record skipped. Required: amount, paymentDate, transactionId, feeStatus.`);
+        if (amount !== undefined || paymentDate || transactionId || feeStatus || payment_for || academic_year) {
+            if (!amount || !transactionId || !payment_for || !academic_year || !semester || !feeStatus) {
+                 console.warn(`Incomplete fee details for roll_no ${roll_no}. Fee record skipped. Required: amount, transactionId, payment_for, academic_year, semester, feeStatus`);
             } else {
                 feeData = {
                     student_id: student._id,
                     amount,
-                    paymentDate: new Date(paymentDate),
-                    transactionId,
-                    status: feeStatus
+                    payment_date: paymentDate ? new Date(paymentDate) : new Date(),
+                    transaction_id: transactionId,
+                    payment_for,
+                    academic_year,
+                    semester,
+                    status: feeStatus,
+                    payment_method: payment_method || 'Online',
+                    remarks
                 };
             }
         }
 
         let academicData = null;
-        if (semester !== undefined || cgpa !== undefined || backlogs !== undefined) {
-            if (semester === undefined || cgpa === undefined || backlogs === undefined) {
-                console.warn(`Incomplete academic details for roll_no ${roll_no}. Academic record skipped. Required: semester, cgpa, backlogs.`);
+        if (semester !== undefined || cgpa !== undefined || courses) {
+            if (!semester || !academic_year || !courses || !Array.isArray(courses) || courses.length === 0) {
+                console.warn(`Incomplete academic details for roll_no ${roll_no}. Academic record skipped. Required: semester, academic_year, courses`);
             } else {
+                // Validate course data
+                const isValidCourses = courses.every(course => 
+                    course.course_code && course.course_name
+                );
+                
+                if (!isValidCourses) {
+                    console.warn(`Invalid course data. Each course must have course_code and course_name`);
+                    return res.status(400).json({
+                        success: false,
+                        message: "Invalid course data. Each course must have course_code and course_name"
+                    });
+                }
+
                 academicData = {
                     student_id: student._id,
                     semester,
-                    cgpa,
-                    backlogs
+                    academic_year,
+                    cgpa: cgpa || null,
+                    courses,
+                    registration_status: 'Registered',
+                    registration_date: new Date()
                 };
             }
         }

@@ -7,13 +7,13 @@ import { createNotice, deleteNotice, getAllNotices, updateNotice} from "../contr
 
 const router=express.Router();
 
-router.get('/studentDetails',protectAdmin,studentDetailsForAdmin)
-router.post ('/addStudentDetails',protectAdmin,addStudentDetails)
-router.patch('/updateStudentDetails', protectAdmin, updateStudentDetails);
+router.get('/studentDetails',studentDetailsForAdmin)
+router.post ('/addStudentDetails',addStudentDetails)
+router.patch('/updateStudentDetails', updateStudentDetails);
 
-router.post('/createNotice',protectAdmin,createNotice)
-router.get('/viewNotice',protectAdmin,getAllNotices)
-router.put('/updateNotice',protectAdmin,updateNotice)
-router.delete('/deleteNotice',protectAdmin,deleteNotice)
+router.post('/createNotice',createNotice)
+router.get('/viewNotice',getAllNotices)
+router.put('/updateNotice',updateNotice)
+router.delete('/deleteNotice',deleteNotice)
 
 export default router

@@ -17,7 +17,6 @@ const createNotice = async (req, res) => {
     }
 
     const newNotice = new Notice({
-      userid,
       title,
       body,
     });
@@ -33,7 +32,7 @@ const createNotice = async (req, res) => {
 // Get all notices
 const getAllNotices = async (req, res) => {
   try {
-    const notices = await Notice.find().populate('userid', 'name email'); // Populate admin details if needed
+    const notices = await Notice.find()
     res.status(200).json(notices);
   } catch (error) {
     console.error('Error fetching notices:', error);

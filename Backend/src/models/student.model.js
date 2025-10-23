@@ -44,6 +44,8 @@ const studentSchema = new mongoose.Schema({
   },
   roll_number: {
     type: String,
+    required: [true, 'Roll number is required.'],
+    unique: true,
     trim: true,
   },
   image: {

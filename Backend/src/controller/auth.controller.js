@@ -9,8 +9,6 @@ const generateToken = (id) => {
     expiresIn: '30d',
   });
 };
-
-// --- REPLACE YOUR OLD register FUNCTION WITH THIS ---
 export const register = async (req, res) => {
   // 1. Destructure ALL fields from the body (text fields)
   const {

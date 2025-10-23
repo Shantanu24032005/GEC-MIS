@@ -17,15 +17,17 @@ const AdminLoginScreen = () => {
     }
 
     setIsLoading(true);
+    const payload={
+      username:username,
+      password:password
+    }
 
     try {
-      const response = await axios.post('http://localhost:3000/api/adminauth/adminLogin', {
-        username,
-        password,
-      });
+      const response = await axios.post('http://localhost:3000/api/adminauth/adminLogin',payload,{headers:{'Content-Type':'application/json',},});
 
-      if (response.data && response.data.token) {
-        await AsyncStorage.setItem('adminAuthToken', response.data.token);
+      if (response.data && response.data.admin) {
+        // Store admin data in AsyncStorage
+        await AsyncStorage.setItem('adminData', JSON.stringify(response.data.admin));
         Alert.alert('Success', 'Login successful!');
         router.push('/admin/dashboard');
       } else {

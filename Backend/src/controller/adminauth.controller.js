@@ -103,9 +103,17 @@ export const adminLogin = async (req, res) => {
     const adminResponse = admin.toObject();
     delete adminResponse.password;
 
+    // Include the token in the response for React Native client
+    const token = jwt.sign(
+      { adminId: admin._id, role: admin.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '15d' }
+    );
+
     res.status(200).json({
       message: 'Admin logged in successfully.',
       admin: adminResponse,
+      token: token
     });
 
   } catch (error) {

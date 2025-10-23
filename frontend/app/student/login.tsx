@@ -44,11 +44,6 @@ const LoginScreen = () => {
       // Redirect to home.tsx (assuming path '/student/home')
       router.push('/student/home');
 
-      // Optional: Store authentication token if provided by the API
-      // if (response.data.token) {
-      //   // Use AsyncStorage or secure storage
-      //   console.log('Token received:', response.data.token);
-      // }
 
     } catch (error: any) {
       // Handle login errors
