@@ -69,6 +69,14 @@ export default function WelcomeScreen() {
           >
             <Text style={styles.buttonText}>Get Started</Text>
           </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.button}
+            
+            // CORRECTED: Changed file path to route name
+            onPress={() => router.push('/admin/login')}
+          >
+            <Text style={styles.buttonText}>Are you an Admin</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>

@@ -1,217 +1,182 @@
-import { useRouter } from 'expo-router';
-import React from 'react';
-import {
-  Dimensions,
-  Image,
-  ImageBackground,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import axios, { AxiosError } from 'axios'; // Import axios
+import * as SecureStore from 'expo-secure-store';
 
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-
-
-const InfoRow = ({ label, value }: { label: string; value: string }) => (
-  <View style={styles.infoRow}>
-    <Text style={styles.infoLabel}>{label}</Text>
-    <Text style={styles.infoValue}>{value}</Text>
-  </View>
-);
-
-export default function ProfileScreen() {
-  const router = useRouter();
-  const insets = useSafeAreaInsets();
-
-  return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <StatusBar barStyle="dark-content" />
-
-      
-      <View style={[styles.header, { paddingTop: insets.top > 0 ? 10 : 20 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerLeft}>
-          <Image
-            source={{ uri: 'https://placehold.co/100x100/E57373/FFFFFF?text=DS' }}
-            style={styles.headerProfilePic}
-          />
-          <View style={styles.headerDivider} />
-          <Text style={styles.headerTitle}>PROFILE</Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView 
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-      >
-       
-        <ImageBackground
-          source={{ uri: 'https://placehold.co/600x250/5D9BCC/FFFFFF?text=Graduation' }}
-          style={styles.banner}
-          resizeMode="cover"
-        >
-          <View style={styles.bannerOverlay} />
-        </ImageBackground>
-
-        
-        <View style={styles.profileCard}>
-          <Image
-            source={{ uri: 'https://placehold.co/150x150/E57373/FFFFFF?text=DS' }}
-            style={styles.profilePic}
-          />
-          <Text style={styles.profileName}>Shivaji Naik</Text>
-
-          <View style={styles.infoSection}>
-            <InfoRow label="Student ID:" value="stud23.vvd1@gec.ac.in" />
-            <InfoRow label="Program:" value="Bachelors in Computer Engineering" />
-            <InfoRow label="Current Year & Sem:" value="Third Year, Sem 5" />
-          </View>
-          
-          <View style={styles.divider} />
-          
-          <View style={styles.infoSection}>
-            <InfoRow label="Roll No.:" value="23B-CO-059" />
-            <InfoRow label="Class:" value="2" />
-            <InfoRow label="Batch:" value="C" />
-          </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.infoSection}>
-            <InfoRow label="PR Number:" value="202311978" />
-            <InfoRow label="Mentor:" value="Prof Rechael Dhanraj" />
-            <InfoRow label="Alt Email:" value="naik59gec@gmail.com" />
-          </View>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
+// Define an interface for the student data structure (optional but recommended)
+interface StudentProfile {
+  name: string;
+  email: string;
+  rollNumber: string;
+  department: string;
+  year: number;
+  // Add other relevant fields based on your API response
+  // Example: mobileNumber?: string; address?: string;
 }
 
+const ProfileScreen = () => {
+  const [profile, setProfile] = useState<StudentProfile | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        // --- Get the token from secure storage ---
+        // Replace 'authToken' with the actual key you used to store the token
+        const token = await SecureStore.getItemAsync('authToken');
+
+        if (!token) {
+          // Handle the case where the token is not found (e.g., user not logged in)
+          setError('Authentication token not found. Please log in again.');
+          setIsLoading(false);
+          // Optional: Redirect to login screen
+          // router.replace('/student/login');
+          return;
+        }
+        // ------------------------------------------
+
+        // --- Make the request with the Authorization header ---
+        const response = await axios.get<StudentProfile>(
+          'http://localhost:3000/api/details/profile',
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Include the token here
+            },
+          }
+        );
+        // ----------------------------------------------------
+
+        setProfile(response.data);
+
+      } catch (err) {
+        console.error("Failed to fetch profile:", err);
+
+        let errorMessage = 'Failed to load profile data. Please try again later.';
+        if (axios.isAxiosError(err)) {
+          const axiosError = err as AxiosError;
+          if (axiosError.response) {
+            errorMessage = `Failed to load profile data. Server responded with status ${axiosError.response.status}.`;
+             // Specific handling for 401
+             if (axiosError.response.status === 401) {
+                errorMessage += ' Invalid or expired token.';
+      
+             }
+          } else if (axiosError.request) {
+            errorMessage = 'Failed to load profile data. No response from server.';
+          } else {
+            errorMessage = `Failed to load profile data. Error: ${axiosError.message}`;
+          }
+        } else if (err instanceof Error) {
+           errorMessage = `Failed to load profile data. ${err.message}`;
+        }
+
+        setError(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, []);
+
+  // --- Render Logic ---
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.centered}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loading Profile...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.centered}>
+        <Text style={styles.errorText}>{error}</Text>
+        {/* Optionally add a retry button */}
+      </SafeAreaView>
+    );
+  }
+
+   if (!profile) {
+     return (
+       <SafeAreaView style={styles.centered}>
+         <Text>No profile data found.</Text>
+       </SafeAreaView>
+     )
+   }
+
+  // --- Main Profile Display ---
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* <Header title="Profile" /> Optional: If you have a Header component */}
+      <View style={styles.profileCard}>
+        <Text style={styles.label}>Name:</Text>
+        <Text style={styles.value}>{profile.name}</Text>
+
+        <Text style={styles.label}>Roll Number:</Text>
+        <Text style={styles.value}>{profile.rollNumber}</Text>
+
+        <Text style={styles.label}>Email:</Text>
+        <Text style={styles.value}>{profile.email}</Text>
+
+        <Text style={styles.label}>Department:</Text>
+        <Text style={styles.value}>{profile.department}</Text>
+
+        <Text style={styles.label}>Year:</Text>
+        <Text style={styles.value}>{profile.year}</Text>
+
+        {/* Add other fields as needed */}
+      </View>
+      {/* Add other UI elements as required */}
+    </SafeAreaView>
+  );
+};
+
+// --- Styles ---
+// (Styles remain the same as the previous example)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F0F4F8',
   },
-  
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: '#F0F4F8',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
-    minHeight: 60,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  headerProfilePic: {
-    width: screenWidth * 0.08, 
-    height: screenWidth * 0.08,
-    borderRadius: (screenWidth * 0.08) / 2,
-    minWidth: 28,
-    minHeight: 28,
-  },
-  headerDivider: {
-    width: 1,
-    height: 24,
-    backgroundColor: '#D0D0D0',
-    marginHorizontal: 15,
-  },
-  headerTitle: {
-    fontSize: screenWidth > 375 ? 16 : 14, 
-    fontWeight: '600',
-    color: '#34495E',
-    letterSpacing: 1,
-  },
-  
-  scrollContainer: {
-    paddingBottom: 40,
-    flexGrow: 1,
-  },
-  banner: {
-    height: screenHeight * 0.25, 
-    width: '100%',
+  centered: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    minHeight: 180,
-  },
-  bannerOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.2)',
-  },
-  
-  profileCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    marginHorizontal: 20,
-    marginTop: -(screenHeight * 0.1), 
     padding: 20,
-    paddingTop: screenWidth * 0.15, 
-    alignItems: 'center',
+  },
+  profileCard: {
+    margin: 20,
+    padding: 20,
+    borderRadius: 8,
+    backgroundColor: '#fff',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 10,
-    minHeight: screenHeight * 0.6, 
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  profilePic: {
-    width: screenWidth * 0.28, 
-    height: screenWidth * 0.28,
-    borderRadius: (screenWidth * 0.28) / 2,
-    borderWidth: 4,
-    borderColor: '#FFFFFF',
-    position: 'absolute',
-    top: -(screenWidth * 0.14), 
-    minWidth: 100,
-    minHeight: 100,
-  },
-  profileName: {
-    fontSize: screenWidth > 375 ? 24 : 20, 
+  label: {
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#34495E',
-    marginBottom: 25,
-    textAlign: 'center',
-    paddingHorizontal: 10,
+    color: '#555',
+    marginTop: 10,
   },
-  
-  infoSection: {
-    width: '100%',
-    marginBottom: 15,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    paddingVertical: 8,
-    minHeight: 40,
-  },
-  infoLabel: {
-    fontSize: screenWidth > 375 ? 14 : 12, 
-    color: '#888',
-    flex: 0.42,
-    flexWrap: 'wrap',
-  },
-  infoValue: {
-    fontSize: screenWidth > 375 ? 14 : 12, 
+  value: {
+    fontSize: 16,
     color: '#333',
-    fontWeight: '500',
-    textAlign: 'right',
-    flex: 0.58,
-    flexWrap: 'wrap',
+    marginBottom: 5,
   },
-  divider: {
-    width: '100%',
-    height: 1,
-    backgroundColor: '#F0F0F0',
-    marginVertical: 10,
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
   },
 });
+
+export default ProfileScreen;
