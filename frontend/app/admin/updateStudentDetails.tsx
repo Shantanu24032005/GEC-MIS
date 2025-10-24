@@ -44,7 +44,7 @@ const UpdateStudentDetails = () => {
 
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:8000/api/adminDetails/studentDetails', {
+      const response = await axios.get('http://localhost:3000/api/adminDetails/studentDetails', {
         params: { 'roll-no': rollNo }
       });
 
@@ -72,28 +72,38 @@ const UpdateStudentDetails = () => {
       return;
     }
 
+    // Prepare update objects, filtering out empty values
+    const feeUpdateData = Object.fromEntries(Object.entries(feeUpdate).filter(([_, v]) => v !== ''));
+    const academicUpdateData = Object.fromEntries(Object.entries(academicUpdate).filter(([_, v]) => v !== ''));
+
     const updateData = {
       roll_no: rollNo,
       ...(feeId && { fee_id: feeId }),
       ...(academicId && { academic_id: academicId }),
-      ...feeUpdate,
-      ...academicUpdate
+      ...feeUpdateData,
+      ...academicUpdateData
     };
 
-    // Remove empty fields
-    Object.keys(updateData).forEach(key => {
-      if (!updateData[key]) delete updateData[key];
-    });
+    // Validate that there is something to update
+    const hasFeeFieldsToUpdate = feeId && Object.keys(feeUpdateData).length > 0;
+    const hasAcademicFieldsToUpdate = academicId && Object.keys(academicUpdateData).length > 0;
 
-    if (Object.keys(updateData).length <= 1) { // 1 because roll_no will always be there
-      Alert.alert('Error', 'Please provide at least one field to update');
+    if (!hasFeeFieldsToUpdate && !hasAcademicFieldsToUpdate) {
+      Alert.alert(
+        'Error',
+        'Please provide a Fee ID and at least one fee field to update, or an Academic ID and at least one academic field to update.'
+      );
+      return;
+    }
+    if (!feeId && !academicId) {
+      Alert.alert('Error', 'Please provide a Fee ID or an Academic ID to proceed with an update.');
       return;
     }
 
     setLoading(true);
     try {
       const response = await axios.patch(
-        'http://localhost:8000/api/adminDetails/updateStudentDetails',
+        'http://localhost:3000/api/adminDetails/updateStudentDetails',
         updateData
       );
 
@@ -111,6 +121,8 @@ const UpdateStudentDetails = () => {
           cgpa: '',
           backlogs: ''
         });
+        setFeeId('');
+        setAcademicId('');
         setStudentFound(false);
         setRollNo('');
       }
@@ -154,6 +166,12 @@ const UpdateStudentDetails = () => {
             <Text style={styles.sectionTitle}>Update Fee Details</Text>
             <TextInput
               style={styles.input}
+              placeholder="Fee Record ID (Required for Fee Update)"
+              value={feeId}
+              onChangeText={setFeeId}
+            />
+            <TextInput
+              style={styles.input}
               placeholder="Amount"
               value={feeUpdate.amount}
               onChangeText={(value) => setFeeUpdate(prev => ({ ...prev, amount: value }))}
@@ -182,6 +200,12 @@ const UpdateStudentDetails = () => {
           {/* Academic Update Section */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Update Academic Details</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Academic Record ID (Required for Academic Update)"
+              value={academicId}
+              onChangeText={setAcademicId}
+            />
             <TextInput
               style={styles.input}
               placeholder="Semester (1-8)"
