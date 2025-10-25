@@ -4,7 +4,9 @@ import Academic from './../models/academic.model.js';
 
 export const studentDetailsForAdmin = async (req, res) => {
     try {
-        const { name, "roll-no": rollNo, year, department } = req.body;
+        // Accept filters from query string for GET requests and body for POST if ever used
+        const source = Object.keys(req.query || {}).length ? req.query : req.body || {};
+        const { name, "roll-no": rollNo, year, department } = source;
 
         const filterQuery = {};
 
