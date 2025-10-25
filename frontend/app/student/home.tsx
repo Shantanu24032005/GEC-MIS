@@ -9,7 +9,6 @@ import {
   Animated,
   Dimensions,
   Image,
-  ImageBackground,
   Linking,
   Modal,
   Pressable,
@@ -20,7 +19,8 @@ import {
   Text,
   TouchableOpacity,
   View,
-  ActivityIndicator
+  ActivityIndicator,
+  ImageBackground
 } from "react-native";
 
 const { width, height } = Dimensions.get("window");
@@ -54,7 +54,6 @@ const sidebarMenuItems = [
 export default function HomeScreen() {
   const router = useRouter();
   const [isSidebarVisible, setSidebarVisible] = useState(false);
-  const [isContactModalVisible, setContactModalVisible] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState<any | null>(null);
   const [notices, setNotices] = useState<any[]>([]);
   const [loadingNotices, setLoadingNotices] = useState(true);
@@ -104,14 +103,6 @@ export default function HomeScreen() {
     }, 150);
   };
   
-  const handleContactUs = () => {
-    setContactModalVisible(true);
-  };
-
-  const handleCloseContactModal = () => {
-    setContactModalVisible(false);
-  };
-
   const handleNoticePress = (notice: any) => {
     setSelectedNotice(notice);
   };
@@ -201,13 +192,6 @@ export default function HomeScreen() {
                   <View style={styles.sidebarMenu}>
                     <TouchableOpacity
                       style={styles.sidebarMenuItem}
-                      onPress={handleContactUs}
-                    >
-                      <Feather name="mail" size={24} color="#E57373" />
-                      <Text style={styles.sidebarMenuItemText}>Contact Us</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.sidebarMenuItem}
                       onPress={handleLogout}
                     >
                       <Feather name="log-out" size={24} color="#E57373" />
@@ -218,44 +202,6 @@ export default function HomeScreen() {
               </BlurView>
             </ImageBackground>
           </Animated.View>
-        </Pressable>
-      </Modal>
-
-      {/* --- Contact Us Modal --- */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={isContactModalVisible}
-        onRequestClose={handleCloseContactModal}
-      >
-        <Pressable style={styles.contactModalOverlay} onPress={handleCloseContactModal}>
-          <View style={styles.contactCard}>
-            <Text style={styles.contactTitle}>Contact Us at:</Text>
-            
-            <TouchableOpacity 
-              style={styles.contactRow}
-              onPress={() => handleLinkPress('tel:09619910340')}
-            >
-              <Feather name="phone" size={24} color="#25D366" style={styles.contactIcon} />
-              <Text style={styles.contactText}>09619910340</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.contactRow}
-              onPress={() => handleLinkPress('https://m.me/Farmagudigec')}
-            >
-              <Feather name="message-square" size={24} color="#0084FF" style={styles.contactIcon} />
-              <Text style={styles.contactText}>https://m.me/Farmagudigec</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.contactRow}
-              onPress={() => handleLinkPress('mailto:admjaabb1@gmail.com')}
-            >
-              <Feather name="mail" size={24} color="#EA4335" style={styles.contactIcon} />
-              <Text style={styles.contactText}>admjaabb1@gmail.com</Text>
-            </TouchableOpacity>
-          </View>
         </Pressable>
       </Modal>
 
