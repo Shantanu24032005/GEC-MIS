@@ -2,7 +2,7 @@
 
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     Image,
     SafeAreaView,
@@ -12,24 +12,53 @@ import {
     Text,
     TouchableOpacity,
     View,
+    ActivityIndicator,
 } from "react-native";
+import axios from "axios";
 
-// Mock data for payments, replace with real data from an API if needed
-const paymentsData = [
-  { id: "1", academicYear: "AY 2023-24", semester: "Semester 1", amount: "29570" },
-  { id: "2", academicYear: "AY 2023-24", semester: "Semester 2", amount: "26070" },
-  { id: "3", academicYear: "AY 2023-24", semester: "Semester 3", amount: "27770" },
-  { id: "4", academicYear: "AY 2023-24", semester: "Semester 4", amount: "29570" },
-  { id: "5", academicYear: "AY 2023-24", semester: "Semester 5", amount: "29570" },
-];
+// Payments fetched from API: http://localhost:3000/api/details/getFeeDetails
+// Expected item shape fallback: { id, academicYear, semester, amount }
 
 export default function PaymentsScreen() {
   const router = useRouter();
+  const [payments, setPayments] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchPayments = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        // Backend returns an array of Fee documents per getFeeDetails
+        const { data } = await axios.get("http://localhost:3000/api/details/getFeeDetails", {
+          // If auth token/cookies are needed, configure here (e.g., withCredentials: true)
+          withCredentials: true,
+        });
+        const items = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+        const normalized = items.map((it: any, idx: number) => ({
+          id: String(it._id ?? it.id ?? idx),
+          academicYear: it.academic_year ?? it.academicYear ?? it.ay ?? it.year ?? "",
+          semester: it.semester ? `Semester ${it.semester}` : (it.sem ?? ""),
+          amount: String(it.amount ?? it.feeAmount ?? it.total ?? "0"),
+        }));
+        if (mounted) setPayments(normalized);
+      } catch (e: any) {
+        const msg = e?.response?.data?.message || e?.message || "Something went wrong";
+        if (mounted) setError(msg);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+    fetchPayments();
+    return () => { mounted = false; };
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
-      
+
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.paymentSection}>
           <TouchableOpacity
@@ -40,8 +69,22 @@ export default function PaymentsScreen() {
             <Feather name="arrow-right" size={20} color="#34495E" />
           </TouchableOpacity>
 
-          {/* Payment list */}
-          {paymentsData.map((payment) => (
+          {loading && (
+            <View style={{ paddingVertical: 20, alignItems: 'center' }}>
+              <ActivityIndicator size="small" color="#34495E" />
+              <Text style={{ marginTop: 8, color: '#666' }}>Loading payments…</Text>
+            </View>
+          )}
+
+          {!!error && (
+            <Text style={{ color: 'crimson', marginBottom: 10 }}>Error: {error}</Text>
+          )}
+
+          {!loading && !error && payments.length === 0 && (
+            <Text style={{ color: '#666' }}>No fee details if there are no details available</Text>
+          )}
+
+          {!loading && !error && payments.map((payment) => (
             <View key={payment.id} style={styles.paymentCard}>
               <View style={styles.paymentDetails}>
                 <Image

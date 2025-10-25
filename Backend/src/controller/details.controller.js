@@ -3,13 +3,13 @@ import Academic from '../models/academic.model.js';
 import Fee from '../models/fee.model.js';
 import Department from '../models/department.model.js';
 
-// Existing function (kept for reference)
+// Modified function without middleware dependency
 export const getStudentDetails = async (req, res) => {
   try {
-    const studentId = req.student?._id;
+    const { studentId } = req.params;
 
     if (!studentId) {
-        return res.status(403).json({ message: 'Forbidden: User is not a student or ID not found' });
+      return res.status(400).json({ message: 'Student ID is required' });
     }
 
     const student = await Student.findById(studentId).select('-password');
@@ -20,7 +20,7 @@ export const getStudentDetails = async (req, res) => {
 
     let departmentDetails = null;
     if (student.department_name) {
-        departmentDetails = await Department.findOne({ name: student.department_name }).select('head_of_department');
+      departmentDetails = await Department.findOne({ name: student.department_name }).select('head_of_department');
     }
 
     const academics = await Academic.find({ student_id: studentId }).sort({ semester: 1 });
@@ -28,8 +28,8 @@ export const getStudentDetails = async (req, res) => {
 
     res.json({
       details: {
-          ...student.toObject(),
-          head_of_department: departmentDetails?.head_of_department || null
+        ...student.toObject(),
+        head_of_department: departmentDetails?.head_of_department || null
       },
       academics,
       fees,
@@ -41,15 +41,13 @@ export const getStudentDetails = async (req, res) => {
   }
 };
 
-// **NEW FUNCTION**
+// Modified function without middleware dependency
 export const getProfile = async (req, res) => {
   try {
-    // Get the student ID from the middleware
-    const studentId = req.student?._id;
+    const { studentId } = req.params;
 
-    // Ensure the user is a student
     if (!studentId) {
-      return res.status(403).json({ message: 'Forbidden: User is not a student or ID not found' });
+      return res.status(400).json({ message: 'Student ID is required' });
     }
 
     // Fetch only the specified fields for the profile
@@ -72,8 +70,7 @@ export const getProfile = async (req, res) => {
 export const resetPassword = async (req, res) => {
   try {
     const { oldPassword, newPassword, confirmPassword } = req.body;
-    const userId = req.user?._id; // From protectAll middleware
-    const isStudent = !!req.student?._id; // Check if the logged-in user is a student
+    const { studentId } = req.params;
 
     // 1. Validation
     if (!oldPassword || !newPassword || !confirmPassword) {
@@ -82,34 +79,25 @@ export const resetPassword = async (req, res) => {
     if (newPassword !== confirmPassword) {
       return res.status(400).json({ message: 'New passwords do not match' });
     }
-
-    // 2. Find the user (could be Student or Admin)
-    let user;
-    if (isStudent) {
-      user = await Student.findById(userId);
-      if (newPassword.length < 6) {
-        return res.status(400).json({ message: 'Password must be at least 6 characters long' });
-      }
-    } else {
-      user = await Admin.findById(userId);
-      if (newPassword.length < 8) {
-        return res.status(400).json({ message: 'Password must be at least 8 characters long' });
-      }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters long' });
     }
 
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    // 2. Find the student
+    const student = await Student.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
     }
 
     // 3. Check if old password is correct
-    const isMatch = await user.comparePassword(oldPassword);
+    const isMatch = await student.comparePassword(oldPassword);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid old password' });
     }
 
     // 4. Set new password and save
-    user.password = newPassword;
-    await user.save(); // pre-save hook in the model will automatically hash the new password
+    student.password = newPassword;
+    await student.save(); // pre-save hook in the model will automatically hash the new password
 
     res.status(200).json({ message: 'Password changed successfully' });
 
@@ -120,9 +108,15 @@ export const resetPassword = async (req, res) => {
 };
 export const getFeeDetails = async (req, res) => {
   try {
+    const { studentId } = req.params;
+    
+    if (!studentId) {
+      return res.status(400).json({ message: 'Student ID is required' });
+    }
+
     // Build query object based on request query parameters
     const query = {
-      student_id: req.student._id
+      student_id: studentId
     };
     if (req.query.payment_for) {
       query.payment_for = req.query.payment_for;
@@ -149,18 +143,20 @@ export const getFeeDetails = async (req, res) => {
 };
 export const getResultDetails = async (req, res) => {
   try {
-    const academicRecord = await Academic.findOne({
-      student_id: req.student._id,
-    });
-
-    if (!academicRecord || !academicRecord.academics) {
-      return res.status(404).json({
-        message: "Result not found"
-      });
+    const studentId = req.student?._id;
+    if (!studentId) {
+      return res.status(403).json({ message: 'Forbidden: User is not a student or ID not found' });
     }
 
-    // Return the array of semester results
-    res.status(200).json(academicRecord.academics);
+    // Find all academic records for the student (one document per semester)
+    const academicRecords = await Academic.find({ student_id: studentId }).sort({ semester: 1 });
+
+    if (!academicRecords || academicRecords.length === 0) {
+      return res.status(404).json({ message: 'Result not found' });
+    }
+
+    // Return the array of semester academic documents
+    res.status(200).json(academicRecords);
   } catch (error) {
     console.error("Error fetching result details:", error);
     res.status(500).json({

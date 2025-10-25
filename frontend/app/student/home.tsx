@@ -2,8 +2,9 @@
 
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from 'expo-blur';
+import axios from 'axios';
 import { useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
@@ -18,9 +19,9 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
+  ActivityIndicator
 } from "react-native";
-import notices from "../../assets/notices.json";
 
 const { width, height } = Dimensions.get("window");
 
@@ -45,7 +46,6 @@ const sidebarMenuItems = [
   { icon: "home", name: "Home", route: "/student/home" }, // Or just "." if already on home
   { icon: "user", name: "Profile", route: "/student/profile" },
   { icon: "book-open", name: "Registration", route: "/student/registration-status" },
-  { icon: "calendar", name: "Internal Marks", route: "/student/internal-marks" },
   { icon: "settings", name: "Reset Password", route: "/student/reset-password" },
   { icon: "award", name: "Semester Result", route: "/student/semester-result" },
   { icon: "dollar-sign", name: "My Payments", route: "/student/payments" }, // Typo fixed
@@ -56,6 +56,10 @@ export default function HomeScreen() {
   const [isSidebarVisible, setSidebarVisible] = useState(false);
   const [isContactModalVisible, setContactModalVisible] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState<any | null>(null);
+  const [notices, setNotices] = useState<any[]>([]);
+  const [loadingNotices, setLoadingNotices] = useState(true);
+  const [noticeError, setNoticeError] = useState<string | null>(null);
+
   const slideAnim = useRef(new Animated.Value(-width * 0.8)).current;
 
   const toggleSidebar = (visible: boolean) => {
@@ -66,6 +70,25 @@ export default function HomeScreen() {
       useNativeDriver: true,
     }).start();
   };
+
+  useEffect(() => {
+    const fetchNotices = async () => {
+      try {
+        setLoadingNotices(true);
+        setNoticeError(null);
+        const response = await axios.get('http://localhost:3000/api/details/home');
+        // The backend returns { success: true, data: notices }
+        if (response.data && Array.isArray(response.data.data)) {
+          setNotices(response.data.data);
+        }
+      } catch (err: any) {
+        setNoticeError(err.response?.data?.message || 'Failed to fetch notices.');
+      } finally {
+        setLoadingNotices(false);
+      }
+    };
+    fetchNotices();
+  }, []);
 
   const handleLogout = () => {
     toggleSidebar(false);
@@ -356,21 +379,33 @@ export default function HomeScreen() {
           {/* Notices Section */}
           <View style={styles.noticesSection}>
             <Text style={styles.sectionTitle}>Notices</Text>
-            {notices.map((notice) => (
-              <TouchableOpacity
-                key={notice.id}
-                style={styles.noticeCard}
-                onPress={() => handleNoticePress(notice)}
-              >
-                <View style={styles.noticeHeader}>
-                  <Text style={styles.noticeTitle}>{notice.title}</Text>
-                  <Text style={styles.noticeDate}>{notice.date}</Text>
-                </View>
-                <Text style={styles.noticeDescription}>
-                  {notice.description}
-                </Text>
-              </TouchableOpacity>
-            ))}
+            {
+              loadingNotices ? (
+                <ActivityIndicator size="large" color="#E57373" style={{ marginTop: 20 }} />
+              ) : noticeError ? (
+                <Text style={styles.errorText}>{noticeError}</Text>
+              ) : notices.length === 0 ? (
+                <Text style={styles.noNoticesText}>No notices available at the moment.</Text>
+              ) : (
+                notices.map((notice) => (
+                  <TouchableOpacity
+                    key={notice._id}
+                    style={styles.noticeCard}
+                    onPress={() => handleNoticePress(notice)}
+                  >
+                    <View style={styles.noticeHeader}>
+                      <Text style={styles.noticeTitle}>{notice.title}</Text>
+                      <Text style={styles.noticeDate}>
+                        {new Date(notice.createdAt).toLocaleDateString()}
+                      </Text>
+                    </View>
+                    <Text style={styles.noticeDescription} numberOfLines={3}>
+                      {notice.body}
+                    </Text>
+                  </TouchableOpacity>
+                ))
+              )
+            }
           </View>
         </View>
       </ScrollView>
@@ -725,5 +760,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#555",
     lineHeight: 24,
+  },
+  errorText: {
+    textAlign: 'center',
+    color: 'red',
+    marginTop: 20,
+    fontSize: 16,
+  },
+  noNoticesText: {
+    textAlign: 'center',
+    color: '#666',
+    marginTop: 20,
+    fontSize: 16,
   },
 });

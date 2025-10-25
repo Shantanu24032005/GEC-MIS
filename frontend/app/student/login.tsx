@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import axios from 'axios'; 
 
@@ -37,7 +38,16 @@ const LoginScreen = () => {
         },
       });
 
-      // Handle successful login
+
+      // Save token to local storage (AsyncStorage for React Native)
+      if (response.data && response.data.token) {
+        try {
+          await AsyncStorage.setItem('studentToken', response.data.token);
+        } catch (storageError) {
+          console.error('Failed to save token:', storageError);
+        }
+      }
+
       console.log('Login successful:', response.data);
       Alert.alert('Success', 'Login successful!');
 

@@ -9,7 +9,7 @@ const router = express.Router();
 router.get('/student', protectAll, getStudentDetails);
 router.get('/profile',protectAll,getProfile)
 router.put('/resetpassword',protectAll,resetPassword)
-router.get('/home',protectAll,getAllNotices)
+router.get('/home',getAllNotices)
 router.get('/getResult',protectAll,getResultDetails)
 router.get('/getFeeDetails',protectAll,getFeeDetails)
 
