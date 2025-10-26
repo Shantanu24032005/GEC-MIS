@@ -25,23 +25,6 @@ import {
 
 const { width, height } = Dimensions.get("window");
 
-// Define a type for your routes to fix the TypeScript error
-// CORRECTED: Removed leading slashes to use relative routing
-type AppRoutes = 
-  | 'home'
-  | 'profile'
-  | 'registration-status'
-  | 'internal-marks'
-  | 'reset-password'
-  | 'semester-result'
-  | 'payments'
-  | 'info'
-  | 'contact-us'
-  | 'be-admission'
-  | 'me-admission';
-
-// Sidebar menu items data with routes
-// CORRECTED: Removed leading slashes from routes
 const sidebarMenuItems = [
   { icon: "home", name: "Home", route: "/student/home" }, // Or just "." if already on home
   { icon: "user", name: "Profile", route: "/student/profile" },
@@ -151,12 +134,6 @@ export default function HomeScreen() {
                     style={styles.profilePic}
                   />
                 </TouchableOpacity>
-                <Text style={[styles.profileName, { textShadowColor: 'rgba(0, 0, 0, 0.75)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 3 }]}>
-                  Shivaji Naik
-                </Text>
-                <Text style={[styles.profileDetails, { textShadowColor: 'rgba(0, 0, 0, 0.75)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 3 }]}>
-                  B.E | Sem 5 | Computer
-                </Text>
               </View>
             </ImageBackground>
 
@@ -237,10 +214,6 @@ export default function HomeScreen() {
         >
           <View style={styles.menuIconContainer}>
             <Feather name="grid" size={24} color="#E57373" />
-          </View>
-          <View>
-            <Text style={styles.navBarTitle}>Shivaji</Text>
-            <Text style={styles.navBarSubtitle}>23B-CO-059</Text>
           </View>
         </TouchableOpacity>
       </View>

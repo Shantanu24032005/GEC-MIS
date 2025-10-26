@@ -6,12 +6,12 @@ import { getAllNotices } from '../controller/notice.controller.js';
 const router = express.Router();
 
 // Route specifically for student details, protected by the general middleware
-router.get('/student', protectAll, getStudentDetails);
-router.get('/profile/:studentId',protectAll,getProfile)
-router.put('/resetpassword',protectAll,resetPassword)
+router.get('/student/:studentId', protectAll, getStudentDetails);
+router.get('/profile/:studentId', protectAll, getProfile)
+router.put('/resetpassword',resetPassword)
 router.get('/home',getAllNotices)
-router.get('/getResult',protectAll,getResultDetails)
-router.get('/getFeeDetails',protectAll,getFeeDetails)
+router.get('/getResult/:studentId',protectAll,getResultDetails)
+router.get('/getFeeDetails/:studentId',protectAll,getFeeDetails)
 
 
 export default router;
