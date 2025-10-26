@@ -130,32 +130,21 @@ export const login = async (req, res) => {
             return res.status(400).json({ message: 'Please provide email and password' });
         }
 
-        let user = await Student.findOne({ email });
-        let userType = 'student';
-
-        // If not found as student, check if it's an admin
-        if (!user) {
-            user = await Admin.findOne({ email });
-            userType = 'admin';
-        }
+        const student = await Student.findOne({ email });
 
         // If user exists and password matches
-        if (user && (await user.comparePassword(password))) {
-            const token = generateToken(user._id);
+        if (student && (await student.comparePassword(password))) {
+            const token = generateToken(student._id);
 
             res.cookie('token', token, {
                 httpOnly: true,
-                // secure: process.env.NODE_ENV !== 'development', // Use secure cookies in production
-                // sameSite: 'strict', // Prevent CSRF
-                // maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
             });
 
             res.json({
-                _id: user._id,
-                // Use username for admin, first/last name for student
-                name: userType === 'admin' ? user.username : `${user.first_name} ${user.last_name}`,
-                email: user.email,
-                userType: userType,
+                _id: student._id,
+                name: `${student.first_name} ${student.last_name}`,
+                email: student.email,
+                userType: 'student',
                 message: "Login successful"
             });
         } else {
@@ -178,3 +167,16 @@ export const logout = (req, res) => {
   });
   res.status(200).json({ message: 'Logged out successfully' });
 };
+/*first_name:vaibhav
+last_name:velip
+date_of_birth:2005-07-07
+email:vaibhav@gmail.com
+password:prapti
+phone_number:3153577919
+address:vasco,goa
+enrollment_number:20249067
+roll_number:23B-CO-077
+admission_year:2023
+current_year:3
+current_semester:5
+department_name:Computer */

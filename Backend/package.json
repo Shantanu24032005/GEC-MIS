@@ -7,10 +7,6 @@
     "test": "jest --config jest.config.cjs",
     "start": "node server.js"
   },
-  "devDependencies": {
-    "jest": "^29.7.0",
-    "mockingoose": "^2.34.2"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",

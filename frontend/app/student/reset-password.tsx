@@ -1,8 +1,10 @@
 // File: app/reset-password.tsx
 
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  ActivityIndicator,
+  Alert,
   Dimensions,
   Image,
   ImageBackground,
@@ -13,6 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
@@ -20,13 +23,71 @@ const { width, height } = Dimensions.get('window');
 const backgroundImage = require('../../assets/image_bfba9e.jpg');
 
 export default function ResetPasswordScreen() {
+  const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  // Assuming studentId is passed as a route parameter
+  const { studentId } = useLocalSearchParams();
 
-  const handleResetPassword = () => {
-    // Implement your password reset logic here
-    console.log('Resetting password...');
+  const handleResetPassword = async () => {
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      Alert.alert('Error', 'Please fill in all fields.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      Alert.alert('Error', 'New passwords do not match.');
+      return;
+    }
+    if (newPassword.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters long.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // 1. Get the auth token from storage
+      const token = await AsyncStorage.getItem('studentToken');
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in again.');
+      }
+
+      // 2. Construct the correct URL with studentId as a parameter
+      const apiUrl = `http://localhost:3000/api/details/resetpassword/${studentId}`;
+
+      // 3. Make the fetch call
+      const response = await fetch(
+        apiUrl,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`, // Add the token here
+          },
+          // The body should only contain what the backend expects in req.body
+          body: JSON.stringify({
+            oldPassword,
+            newPassword,
+            confirmPassword,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Something went wrong');
+      }
+
+      Alert.alert('Success', 'Password changed successfully!', [
+        { text: 'OK', onPress: () => router.back() },
+      ]);
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to reset password.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -45,17 +106,21 @@ export default function ResetPasswordScreen() {
       {/* Main Content Card */}
       <View style={styles.contentCard}>
         {/* Profile Image */}
-        <Image
-          source={{ uri: 'https://placehold.co/100x100/E57373/FFFFFF?text=DS' }}
-          style={styles.profileImage}
-        />
 
         {/* Profile Name and Form Wrapper */}
         <View style={styles.profileAndFormWrapper}>
-          <Text style={styles.profileName}>Derek John Shephard</Text>
 
           {/* Password Reset Form */}
           <View style={styles.formSection}>
+            <Text style={styles.inputLabel}>Old Password:</Text>
+            <TextInput
+              style={styles.input}
+              secureTextEntry
+              value={oldPassword}
+              onChangeText={setOldPassword}
+              placeholder="Enter old password"
+              placeholderTextColor="#888"
+            />
             <Text style={styles.inputLabel}>New Password:</Text>
             <TextInput
               style={styles.input}
@@ -79,8 +144,12 @@ export default function ResetPasswordScreen() {
         </View>
         
         {/* Reset Button */}
-        <TouchableOpacity style={styles.resetButton} onPress={handleResetPassword}>
-          <Text style={styles.resetButtonText}>Reset</Text>
+        <TouchableOpacity style={styles.resetButton} onPress={handleResetPassword} disabled={loading}>
+          {loading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.resetButtonText}>Reset Password</Text>
+          )}
         </TouchableOpacity>
       </View>
     </View>
@@ -165,6 +234,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 15,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   resetButtonText: {
     fontSize: 18,

@@ -1,16 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useLocalSearchParams } from 'expo-router';
 import axios, { AxiosError } from 'axios'; // Import axios
 import * as SecureStore from 'expo-secure-store';
 
 // Define an interface for the student data structure (optional but recommended)
-interface StudentProfile {
+interface StudentProfile { // This is the structure our component uses
   name: string;
   email: string;
   rollNumber: string;
   department: string;
   year: number;
+}
+
+// This interface matches the raw response from the backend API
+interface ApiStudentProfile {
+  first_name: string;
+  last_name: string;
+  email: string;
+  roll_number: string;
+  department_name: string;
+  current_year: number;
   // Add other relevant fields based on your API response
   // Example: mobileNumber?: string; address?: string;
 }
@@ -19,11 +30,13 @@ const ProfileScreen = () => {
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { id: studentId } = useLocalSearchParams<{ id: string }>();
 
   useEffect(() => {
     const fetchProfileData = async () => {
       setIsLoading(true);
       setError(null);
+
 
       try {
         // --- Get the token from secure storage ---
@@ -40,19 +53,34 @@ const ProfileScreen = () => {
         }
         // ------------------------------------------
 
+        if (!studentId) {
+          setError('Student ID not found in the URL.');
+          setIsLoading(false);
+          return;
+        }
+
         // --- Make the request with the Authorization header ---
-        const response = await axios.get<StudentProfile>(
-          'http://localhost:3000/api/details/profile',
+        // The endpoint now includes the studentId from the route params
+        const response = await axios.get<ApiStudentProfile>(
+          `http://localhost:3000/api/details/profile/${studentId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`, // Include the token here
             },
           }
         );
-        // ----------------------------------------------------
 
-        setProfile(response.data);
+        // --- Transform API data to match frontend interface ---
+        const apiData = response.data;
+        const formattedProfile: StudentProfile = {
+          name: `${apiData.first_name} ${apiData.last_name}`,
+          email: apiData.email,
+          rollNumber: apiData.roll_number,
+          department: apiData.department_name,
+          year: apiData.current_year,
+        };
 
+        setProfile(formattedProfile);
       } catch (err) {
         console.error("Failed to fetch profile:", err);
 
@@ -82,7 +110,7 @@ const ProfileScreen = () => {
     };
 
     fetchProfileData();
-  }, []);
+  }, [studentId]);
 
   // --- Render Logic ---
 
