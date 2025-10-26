@@ -7,7 +7,7 @@ const router = express.Router();
 
 // Route specifically for student details, protected by the general middleware
 router.get('/student', protectAll, getStudentDetails);
-router.get('/profile',protectAll,getProfile)
+router.get('/profile/:studentId',protectAll,getProfile)
 router.put('/resetpassword',protectAll,resetPassword)
 router.get('/home',getAllNotices)
 router.get('/getResult',protectAll,getResultDetails)

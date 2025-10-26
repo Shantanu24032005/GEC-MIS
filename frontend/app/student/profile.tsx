@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams } from 'expo-router';
 import axios, { AxiosError } from 'axios'; // Import axios
-import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Define an interface for the student data structure (optional but recommended)
 interface StudentProfile { // This is the structure our component uses
@@ -30,7 +29,6 @@ const ProfileScreen = () => {
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const { id: studentId } = useLocalSearchParams<{ id: string }>();
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -39,28 +37,23 @@ const ProfileScreen = () => {
 
 
       try {
-        // --- Get the token from secure storage ---
-        // Replace 'authToken' with the actual key you used to store the token
-        const token = await SecureStore.getItemAsync('authToken');
+        // --- Get token and studentId from AsyncStorage ---
+        const storedData = await AsyncStorage.multiGet(['studentToken', 'studentId']);
+        const token = storedData.find(item => item[0] === 'studentToken')?.[1];
+        const studentId = storedData.find(item => item[0] === 'studentId')?.[1];
 
-        if (!token) {
-          // Handle the case where the token is not found (e.g., user not logged in)
-          setError('Authentication token not found. Please log in again.');
+
+        if (!token || !studentId) {
+          // Handle case where token or ID is not found (e.g., user not logged in)
+          setError('Authentication details not found. Please log in again.');
           setIsLoading(false);
           // Optional: Redirect to login screen
           // router.replace('/student/login');
           return;
         }
-        // ------------------------------------------
-
-        if (!studentId) {
-          setError('Student ID not found in the URL.');
-          setIsLoading(false);
-          return;
-        }
 
         // --- Make the request with the Authorization header ---
-        // The endpoint now includes the studentId from the route params
+        // The endpoint now includes the studentId from AsyncStorage
         const response = await axios.get<ApiStudentProfile>(
           `http://localhost:3000/api/details/profile/${studentId}`,
           {
@@ -110,7 +103,7 @@ const ProfileScreen = () => {
     };
 
     fetchProfileData();
-  }, [studentId]);
+  }, []);
 
   // --- Render Logic ---
 
