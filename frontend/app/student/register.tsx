@@ -186,7 +186,7 @@ const RegisterScreen = () => {
           {/* Header Section */}
           <View style={styles.headerSection}>
             <Text style={styles.title}>Student Registration</Text>
-            <Text style={styles.subtitle}>Create your account to access the system</Text>
+            <Text style={styles.subtitle}>Create your new account</Text>
           </View>
 
           {/* Form Card */}
@@ -406,11 +406,11 @@ const RegisterScreen = () => {
           </View>
 
           {/* Footer */}
-          <View style={styles.footer}>
+          {/* <View style={styles.footer}>
             <TouchableOpacity onPress={() => router.back()}>
               <Text style={styles.backText}>← Back to Home</Text>
             </TouchableOpacity>
-          </View>
+          </View> */}
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
