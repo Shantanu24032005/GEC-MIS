@@ -23,7 +23,7 @@ const AdminRegisterScreen = () => {
 
     setIsLoading(true);
     try {
-      const response = await axios.post('http://localhost:3000/api/adminauth/register', {
+      const response = await axios.post('https://gec-mis-backend.onrender.com/api/adminauth/register', {
         username,
         email,
         password,

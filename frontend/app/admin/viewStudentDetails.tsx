@@ -38,7 +38,7 @@ const ViewStudentDetails = () => {
         Object.entries(filters).filter(([_, value]) => value !== '')
       );
 
-      const response = await axios.get('http://localhost:3000/api/adminDetails/studentDetails', {
+      const response = await axios.get('https://gec-mis-backend.onrender.com/api/adminDetails/studentDetails', {
         params: filterData
       });
 

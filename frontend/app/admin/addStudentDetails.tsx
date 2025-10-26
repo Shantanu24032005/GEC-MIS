@@ -53,7 +53,7 @@ const AddStudentDetails = () => {
         }))
       };
 
-      const response = await axios.post('http://localhost:3000/api/adminDetails/addStudentDetails', dataToSend);
+      const response = await axios.post('https://gec-mis-backend.onrender.com/api/adminDetails/addStudentDetails', dataToSend);
 
       if (response.data.success) {
         Alert.alert('Success', 'Student details added successfully');

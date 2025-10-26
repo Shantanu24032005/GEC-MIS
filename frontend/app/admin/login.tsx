@@ -23,7 +23,7 @@ const AdminLoginScreen = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3000/api/adminauth/adminLogin',payload,{headers:{'Content-Type':'application/json',},});
+      const response = await axios.post('https://gec-mis-backend.onrender.com/api/adminauth/adminLogin',payload,{headers:{'Content-Type':'application/json',},});
 
       if (response.data && response.data.admin) {
         // Store admin data in AsyncStorage

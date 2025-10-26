@@ -17,7 +17,7 @@ const CreateNotice = () => {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch('http://localhost:3000/api/adminDetails/createNotice', {
+      const res = await fetch('https://gec-mis-backend.onrender.com/api/adminDetails/createNotice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: title.trim(), body: body.trim() }),
