@@ -213,118 +213,105 @@ export const addStudentDetails = async (req, res, next) => {
 export const updateStudentDetails = async (req, res, next) => {
     try {
         // --- 1. Extract Data ---
+        // MODIFIED: roll_no, semester, and academic_year are now the primary identifiers.
         const {
-            roll_no,        // Optional: Good for context/verification
-            fee_id,         // ID of the Fee document to update
-            academic_id,    // ID of the Academic document to update
+            roll_no,
+            semester,
+            academic_year,
             // Fee fields to potentially update
             amount,
             paymentDate,
             transactionId,
             feeStatus,
+            payment_for,
+            payment_method,
+            remarks,
             // Academic fields to potentially update
-            semester,
             cgpa,
-            backlogs
+            courses
         } = req.body;
 
         // --- 2. Validate Input ---
-        if (!fee_id && !academic_id) {
+        // MODIFIED: Check for mandatory identifiers.
+        if (!roll_no || !semester || !academic_year) {
             return res.status(400).json({
                 success: false,
-                message: "Either fee_id or academic_id must be provided for update."
+                message: "roll_no, semester, and academic_year are required for an update."
             });
         }
 
-        // --- 3. Prepare Update Objects ---
+        // --- 3. Find Student ---
+        const student = await Student.findOne({ roll_number: roll_no });
+        if (!student) {
+            return res.status(404).json({
+                success: false,
+                message: `Student with roll number ${roll_no} not found.`
+            });
+        }
+
+        // --- 4. Prepare Update Data ---
         const feeUpdateData = {};
         if (amount !== undefined) feeUpdateData.amount = amount;
-        if (paymentDate) feeUpdateData.paymentDate = new Date(paymentDate);
-        if (transactionId !== undefined) feeUpdateData.transactionId = transactionId;
-         // Use feeStatus to map to 'status' field in Fee model
+        if (paymentDate) feeUpdateData.payment_date = new Date(paymentDate);
+        if (transactionId !== undefined) feeUpdateData.transaction_id = transactionId;
         if (feeStatus !== undefined) feeUpdateData.status = feeStatus;
-
+        if (payment_for !== undefined) feeUpdateData.payment_for = payment_for;
+        if (payment_method !== undefined) feeUpdateData.payment_method = payment_method;
+        if (remarks !== undefined) feeUpdateData.remarks = remarks;
 
         const academicUpdateData = {};
-        if (semester !== undefined) academicUpdateData.semester = semester;
         if (cgpa !== undefined) academicUpdateData.cgpa = cgpa;
-        if (backlogs !== undefined) academicUpdateData.backlogs = backlogs;
+        if (courses !== undefined) academicUpdateData.courses = courses;
 
         // Check if there are actual fields to update for the provided IDs
-        if (fee_id && Object.keys(feeUpdateData).length === 0 && !academic_id) {
-             return res.status(400).json({
-                success: false,
-                message: "No fee fields provided to update for the given fee_id."
-            });
-        }
-         if (academic_id && Object.keys(academicUpdateData).length === 0 && !fee_id) {
-             return res.status(400).json({
-                success: false,
-                message: "No academic fields provided to update for the given academic_id."
-            });
-        }
-         if (fee_id && Object.keys(feeUpdateData).length === 0 && academic_id && Object.keys(academicUpdateData).length === 0) {
+        if (Object.keys(feeUpdateData).length === 0 && Object.keys(academicUpdateData).length === 0) {
             return res.status(400).json({
                 success: false,
-                message: "No fee or academic fields provided to update for the given IDs."
+                message: "No fields provided to update."
             });
         }
 
-
-        // --- 4. Perform Updates ---
+        // --- 5. Find and Perform Updates ---
         let updatedFee = null;
         let updatedAcademic = null;
-
-        // Optional: Find student if roll_no provided, to ensure IDs belong to them
-        let student;
-        if (roll_no) {
-            student = await Student.findOne({ roll_no });
-             if (!student) {
-                return res.status(404).json({
-                    success: false,
-                    message: `Student with roll number ${roll_no} not found.`
-                 });
-            }
-        }
 
         const findByIdAndUpdateOptions = {
             new: true, // Return the modified document rather than the original
             runValidators: true // Ensure updates adhere to schema validation
         };
 
-        if (fee_id && Object.keys(feeUpdateData).length > 0) {
-            // Add student_id check if student was found
-            const feeQuery = student ? { _id: fee_id, student_id: student._id } : { _id: fee_id };
-            updatedFee = await Fee.findOneAndUpdate(feeQuery, feeUpdateData, findByIdAndUpdateOptions);
-            if (!updatedFee) {
-                 return res.status(404).json({
-                    success: false,
-                    message: `Fee record with ID ${fee_id} not found${student ? ` for student ${roll_no}` : ''}. Update failed.`
-                 });
-            }
+        // Define the query to find the records
+        const recordQuery = {
+            student_id: student._id,
+            semester: semester,
+            academic_year: academic_year
+        };
+
+        if (Object.keys(feeUpdateData).length > 0) {
+            updatedFee = await Fee.findOneAndUpdate(recordQuery, feeUpdateData, findByIdAndUpdateOptions);
         }
 
-        if (academic_id && Object.keys(academicUpdateData).length > 0) {
-             // Add student_id check if student was found
-            const academicQuery = student ? { _id: academic_id, student_id: student._id } : { _id: academic_id };
-            updatedAcademic = await Academic.findOneAndUpdate(academicQuery, academicUpdateData, findByIdAndUpdateOptions);
-             if (!updatedAcademic) {
-                // Consider potential rollback if fee update succeeded but academic failed?
-                // For simplicity, we'll report the specific failure here.
-                 return res.status(404).json({
-                    success: false,
-                    message: `Academic record with ID ${academic_id} not found${student ? ` for student ${roll_no}` : ''}. Update failed.`
-                 });
-            }
+        if (Object.keys(academicUpdateData).length > 0) {
+            updatedAcademic = await Academic.findOneAndUpdate(recordQuery, academicUpdateData, findByIdAndUpdateOptions);
         }
 
-        // --- 5. Send Success Response ---
+        // --- 6. Handle "Not Found" during update ---
+        if (!updatedFee && !updatedAcademic) {
+            const feeMessage = Object.keys(feeUpdateData).length > 0 ? "Fee record not found. " : "";
+            const academicMessage = Object.keys(academicUpdateData).length > 0 ? "Academic record not found. " : "";
+            return res.status(404).json({
+                success: false,
+                message: `${feeMessage}${academicMessage}No records found for student ${roll_no}, semester ${semester}, and year ${academic_year}. Update failed.`
+            });
+        }
+
+        // --- 7. Send Success Response ---
         res.status(200).json({
             success: true,
             message: "Student details updated successfully",
             data: {
-                 ...(updatedFee && { fee: updatedFee.toObject() }),
-                 ...(updatedAcademic && { academic: updatedAcademic.toObject() })
+                ...(updatedFee && { fee: updatedFee.toObject() }),
+                ...(updatedAcademic && { academic: updatedAcademic.toObject() })
             }
         });
 
@@ -334,19 +321,55 @@ export const updateStudentDetails = async (req, res, next) => {
         // Handle potential validation errors from findByIdAndUpdate
         if (error.name === 'ValidationError') {
             return res.status(400).json({
-                 success: false,
-                 message: "Validation failed during update.",
-                 errors: error.errors
+                success: false,
+                message: "Validation failed during update.",
+                errors: error.errors
             });
         }
-         // Handle CastError (e.g., invalid ObjectId format)
+        // Handle CastError (e.g., invalid ObjectId format)
         if (error.name === 'CastError') {
-             return res.status(400).json({
-                 success: false,
-                 message: `Invalid ID format provided for ${error.path}.`,
-                 error: error.message
-             });
+            return res.status(400).json({
+                success: false,
+                message: `Invalid ID format provided for ${error.path}.`,
+                error: error.message
+            });
         }
         next(error); // Pass other errors to the default error handler
     }
 };
+/*
+{
+    "roll_no": "23B-CO-059",
+    "academic_year": "2023-2024",
+    "semester": 5,
+    
+    "amount": 40000,
+    "paymentDate": "2023-10-26T10:00:00.000Z",
+    "transactionId": "TYN123456789UNIQUE",
+    "feeStatus": "Paid",
+    "payment_for": "Tuition Fee",
+    "payment_method": "Online",
+    "remarks": "Full tuition fee paid for semester 5.",
+
+    "cgpa": 8.5,
+    "courses": [
+        {
+            "course_code": "CS501",
+            "course_name": "Database Management Systems",
+            "internal_marks": 18,
+            "term_work_marks": 22,
+            "end_sem_exam_marks": 45,
+            "grade": "A"
+        },
+        {
+            "course_code": "CS502",
+            "course_name": "Operating Systems",
+            "internal_marks": 19,
+            "term_work_marks": 23,
+            "end_sem_exam_marks": 50,
+            "grade": "A+"
+        }
+    ]
+}
+
+*/
