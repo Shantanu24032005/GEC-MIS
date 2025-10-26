@@ -39,12 +39,18 @@ const LoginScreen = () => {
       });
 
 
-      // Save token to local storage (AsyncStorage for React Native)
-      if (response.data && response.data.token) {
+      // Save token and student ID to local storage (AsyncStorage for React Native)
+      if (response.data && response.data.token && response.data._id) {
         try {
-          await AsyncStorage.setItem('studentToken', response.data.token);
+          // Use multiSet to save multiple items efficiently
+          await AsyncStorage.multiSet([
+            ['studentToken', response.data.token],
+            ['studentId', response.data._id]
+          ]);
         } catch (storageError) {
-          console.error('Failed to save token:', storageError);
+          console.error('Failed to save data to storage:', storageError);
+          // Optionally, show an alert to the user
+          Alert.alert('Storage Error', 'Could not save login session. Please try again.');
         }
       }
 
