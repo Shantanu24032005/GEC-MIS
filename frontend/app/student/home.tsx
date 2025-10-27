@@ -72,9 +72,11 @@ export default function HomeScreen() {
   }, []);
 
   const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("studentID");
     toggleSidebar(false);
     // CORRECTED: Changed absolute path to relative route
-    router.replace("login");
+    router.push("/student/login");
   };
 
   // This function is now correct because AppRoutes and sidebarMenuItems are corrected
@@ -224,7 +226,7 @@ export default function HomeScreen() {
             <TouchableOpacity
               style={styles.admissionCard}
               // CORRECTED: Changed absolute path to relative route
-              onPress={() => router.push("be-admission")}
+              onPress={() => router.push("/student/be-admission")}
             >
               <ImageBackground
                 source={{
@@ -260,7 +262,7 @@ export default function HomeScreen() {
             <TouchableOpacity
               style={styles.admissionCard}
               // CORRECTED: Changed absolute path to relative route
-              onPress={() => router.push("me-admission")}
+              onPress={() => router.push("/student/me-admision")}
             >
               <ImageBackground
                 source={{
@@ -336,10 +338,6 @@ export default function HomeScreen() {
             style={[styles.footerIcon, styles.footerIconActive]}
           />
           <Text style={[styles.footerText, styles.footerTextActive]}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.footerItem}>
-          <Feather name="book-open" style={styles.footerIcon} />
-          <Text style={styles.footerText}>Schemes</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.footerItem} onPress={handleLogout}>
           <Feather name="log-out" style={styles.footerIcon} />

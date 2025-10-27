@@ -10,8 +10,8 @@ router.get('/student/:studentId', protectAll, getStudentDetails);
 router.get('/profile/:studentId', getProfile)
 router.put('/resetpassword',resetPassword)
 router.get('/home',getAllNotices)
-router.get('/getResult/:studentId',protectAll,getResultDetails)
-router.get('/getFeeDetails/:studentId',protectAll,getFeeDetails)
+router.get('/getResult/:studentId',getResultDetails)
+router.get('/getFeeDetails/:studentId',getFeeDetails)
 
 
 export default router;

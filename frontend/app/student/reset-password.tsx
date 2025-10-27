@@ -54,7 +54,7 @@ export default function ResetPasswordScreen() {
       }
 
       // 2. Construct the correct URL with studentId as a parameter
-      const apiUrl = `http://localhost:3000/api/details/resetpassword/${studentId}`;
+      const apiUrl = `https://gec-mis-backend.onrender.com/api/details/resetpassword/${studentId}`;
 
       // 3. Make the fetch call
       const response = await fetch(

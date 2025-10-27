@@ -143,10 +143,7 @@ export const getFeeDetails = async (req, res) => {
 };
 export const getResultDetails = async (req, res) => {
   try {
-    const studentId = req.student?._id;
-    if (!studentId) {
-      return res.status(403).json({ message: 'Forbidden: User is not a student or ID not found' });
-    }
+    const { studentId } = req.params;
 
     // Find all academic records for the student (one document per semester)
     const academicRecords = await Academic.find({ student_id: studentId }).sort({ semester: 1 });

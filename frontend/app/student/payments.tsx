@@ -31,9 +31,13 @@ export default function PaymentsScreen() {
       try {
         setLoading(true);
         setError(null);
+        const studentId=localStorage.getItem("studentID")
+        const token=localStorage.getItem("token")
         // Backend returns an array of Fee documents per getFeeDetails
-        const { data } = await axios.get("http://localhost:3000/api/details/getFeeDetails", {
-          // If auth token/cookies are needed, configure here (e.g., withCredentials: true)
+        const { data } = await axios.get(`https://gec-mis-backend.onrender.com/api/details/getFeeDetails/${studentId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
           withCredentials: true,
         });
         const items = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);

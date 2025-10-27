@@ -98,30 +98,8 @@ const AdminDashboard = () => {
         <Text style={styles.topBarTitle}>Admin Dashboard</Text>
       </View>
 
-      {/* Backdrop overlay */}
-      {open && <Pressable style={styles.backdrop} onPress={toggleSidebar} />}
-
-      {/* Sidebar */}
-      <Animated.View style={[styles.sidebar, { transform: [{ translateX }] }]}>
-        <Text style={styles.sidebarTitle}>Menu</Text>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigate('/admin/addStudentDetails')}>
-          <Text style={styles.navText}>Add Student Details</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigate('/admin/viewStudentDetails')}>
-          <Text style={styles.navText}>View Student Details</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigate('/admin/updateStudentDetails')}>
-          <Text style={styles.navText}>Update Student Details</Text>
-        </TouchableOpacity>
-      </Animated.View>
-
-      {/* Main Content */}
+      {/* Main Content - MOVED HERE */}
+      {/* This is now rendered FIRST, so it appears at the bottom of the stack */}
       <ScrollView
         style={styles.content}
         refreshControl={
@@ -168,10 +146,37 @@ const AdminDashboard = () => {
           </View>
         )}
       </ScrollView>
+
+      {/* Backdrop overlay - MOVED HERE */}
+      {/* This is rendered SECOND, so it appears on top of the content */}
+      {open && <Pressable style={styles.backdrop} onPress={toggleSidebar} />}
+
+      {/* Sidebar - MOVED HERE */}
+      {/* This is rendered LAST, so it appears on top of both the content and the backdrop */}
+      <Animated.View style={[styles.sidebar, { transform: [{ translateX }] }]}>
+        <Text style={styles.sidebarTitle}>Menu</Text>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigate('/admin/addStudentDetails')}>
+          <Text style={styles.navText}>Add Student Details</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigate('/admin/viewStudentDetails')}>
+          <Text style={styles.navText}>View Student Details</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigate('/admin/updateStudentDetails')}>
+          <Text style={styles.navText}>Update Student Details</Text>
+        </TouchableOpacity>
+      </Animated.View>
+
     </View>
   );
 };
 
+// Styles (unchanged)
 const styles = StyleSheet.create({
   root: {
     flex: 1,
@@ -209,20 +214,20 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    top: 56,
+    top: 56, // Start below topBar
     bottom: 0,
     backgroundColor: 'rgba(52,73,94,0.25)',
   },
   sidebar: {
     position: 'absolute',
     left: 0,
-    top: 56,
+    top: 56, // Start below topBar
     bottom: 0,
     width: SIDEBAR_WIDTH,
     backgroundColor: '#5D9BCC',
     paddingTop: 24,
     paddingHorizontal: 16,
-    elevation: 5,
+    elevation: 5, // Ensures it's above other elements on Android
     shadowColor: '#5D9BCC',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
@@ -251,8 +256,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   content: {
-    flex: 1,
+    flex: 1, // Make sure it fills the available space
     padding: 24,
+    // Add a background color to prevent transparency issues
+    // This isn't strictly necessary after reordering, but good practice
+    backgroundColor: '#F0F4F8',
   },
   welcome: {
     fontSize: 24,
