@@ -54,8 +54,8 @@ const LoginScreen = () => {
       });
 
         try {
-          await localStorage.setItem("studentID",response.data._id)
-          await localStorage.setItem("token",response.data.token)
+          await AsyncStorage.setItem("studentID",response.data._id)
+          await AsyncStorage.setItem("token",response.data.token)
           console.log(response.data.token)
         } catch (storageError) {
           console.error('Failed to save data to storage:', storageError);

@@ -15,6 +15,7 @@ import {
     ActivityIndicator,
 } from "react-native";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Payments fetched from API: http://localhost:3000/api/details/getFeeDetails
 // Expected item shape fallback: { id, academicYear, semester, amount }
@@ -31,8 +32,8 @@ export default function PaymentsScreen() {
       try {
         setLoading(true);
         setError(null);
-        const studentId=localStorage.getItem("studentID")
-        const token=localStorage.getItem("token")
+        const studentId=await AsyncStorage.getItem("studentID")
+        const token=await AsyncStorage.getItem("token")
         // Backend returns an array of Fee documents per getFeeDetails
         const { data } = await axios.get(`https://gec-mis-backend.onrender.com/api/details/getFeeDetails/${studentId}`, {
           headers: {

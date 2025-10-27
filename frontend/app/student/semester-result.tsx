@@ -14,8 +14,8 @@ const SemesterResult = () => {
       setLoading(true);
       setError(null);
       try {
-        const studentId=localStorage.getItem("studentID")
-        const token=localStorage.getItem("token")
+        const studentId=await AsyncStorage.getItem("studentID")
+        const token=await AsyncStorage.getItem("token")
         const response = await axios.get(`https://gec-mis-backend.onrender.com/api/details/getResult/${studentId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
