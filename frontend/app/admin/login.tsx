@@ -1,24 +1,8 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  Alert, 
-  ActivityIndicator,
-  StatusBar,
-  Dimensions,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import axios from 'axios';
-import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
-
-const { width, height } = Dimensions.get('window');
 
 const AdminLoginScreen = () => {
   const router = useRouter();
@@ -33,21 +17,16 @@ const AdminLoginScreen = () => {
     }
 
     setIsLoading(true);
-    const payload = {
-      username: username,
-      password: password
-    };
+    const payload={
+      username:username,
+      password:password
+    }
 
     try {
-<<<<<<< HEAD
-      const response = await axios.post('http://localhost:3000/api/adminauth/adminLogin', payload, {
-        headers: { 'Content-Type': 'application/json' },
-      });
-=======
       const response = await axios.post('https://gec-mis-backend.onrender.com/api/adminauth/adminLogin',payload,{headers:{'Content-Type':'application/json',},});
->>>>>>> fd108ed01efd857a894ef0c3549d0095d05dc7af
 
       if (response.data && response.data.admin) {
+        // Store admin data in AsyncStorage
         await AsyncStorage.setItem('adminData', JSON.stringify(response.data.admin));
         Alert.alert('Success', 'Login successful!');
         router.push('/admin/dashboard');
@@ -64,249 +43,48 @@ const AdminLoginScreen = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
-      
-      {/* Background gradient */}
-      <View style={styles.svgWrapper}>
-        <Svg height={height} width={width}>
-          <Defs>
-            <LinearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
-              <Stop offset="0%" stopColor="#6DB3E8" stopOpacity="1" />
-              <Stop offset="100%" stopColor="#4A90D9" stopOpacity="1" />
-            </LinearGradient>
-            <LinearGradient id="grad2" x1="0%" y1="0%" x2="0%" y2="100%">
-              <Stop offset="0%" stopColor="#5D9BCC" stopOpacity="0.9" />
-              <Stop offset="100%" stopColor="#3E7CB1" stopOpacity="0.9" />
-            </LinearGradient>
-          </Defs>
-          <Path
-            d={`M0,${height * 0.2} Q${width * 0.5},${height * 0.4} ${width},${height * 0.25} L${width},${height} L0,${height} Z`}
-            fill="url(#grad1)"
-          />
-          <Path
-            d={`M0,${height * 0.32} Q${width * 0.6},${height * 0.52} ${width},${height * 0.37} L${width},${height} L0,${height} Z`}
-            fill="url(#grad2)"
-          />
-        </Svg>
-      </View>
+      <View style={styles.card}>
+        <Text style={styles.title}>Admin Login</Text>
 
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
-      >
-        <ScrollView 
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          value={username}
+          onChangeText={setUsername}
+          autoCapitalize="none"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+
+        <TouchableOpacity
+          onPress={handleLogin}
+          style={[styles.button, isLoading && { backgroundColor: '#93c5fd' }]}
+          disabled={isLoading}
         >
-          {/* Header Section */}
-          <View style={styles.headerSection}>
-            <Text style={styles.title}>Admin Login</Text>
-            <Text style={styles.subtitle}>Welcome! Login to access your admin dashboard</Text>
-          </View>
+          {isLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Login</Text>}
+        </TouchableOpacity>
 
-          {/* Form Card */}
-          <View style={styles.formCard}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Username</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your username"
-                placeholderTextColor="#95A5A6"
-                value={username}
-                onChangeText={setUsername}
-                autoCapitalize="none"
-                editable={!isLoading}
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Password</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your password"
-                placeholderTextColor="#95A5A6"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                editable={!isLoading}
-              />
-            </View>
-
-            {/* Login Button */}
-            <TouchableOpacity
-              style={[styles.loginButton, isLoading && styles.buttonDisabled]}
-              onPress={handleLogin}
-              disabled={isLoading}
-              activeOpacity={0.8}
-            >
-              {isLoading ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <Text style={styles.loginButtonText}>Login</Text>
-              )}
-            </TouchableOpacity>
-
-            {/* Divider */}
-            <View style={styles.dividerContainer}>
-              <View style={styles.divider} />
-              <Text style={styles.dividerText}>OR</Text>
-              <View style={styles.divider} />
-            </View>
-
-            {/* Register Button */}
-            <TouchableOpacity
-              style={styles.registerButton}
-              onPress={() => router.push('/admin/register')}
-              disabled={isLoading}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.registerButtonText}>Create New Admin Account</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Footer */}
-          {/* <View style={styles.footer}>
-            <TouchableOpacity onPress={() => router.back()}>
-              <Text style={styles.backText}>← Back to Home</Text>
-            </TouchableOpacity>
-          </View> */}
-        </ScrollView>
-      </KeyboardAvoidingView>
+        <TouchableOpacity onPress={() => router.push('/admin/register')}>
+          <Text style={styles.registerLink}>Don’t have an account? Register</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#E8F1F8',
-  },
-  svgWrapper: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingTop: height * 0.1,
-    paddingBottom: 40,
-  },
-  headerSection: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#1E3A5F',
-    marginBottom: 8,
-    textShadowColor: 'rgba(0, 0, 0, 0.1)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: '#4A6B8A',
-    textAlign: 'center',
-  },
-  formCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#2C3E50',
-    marginBottom: 8,
-    letterSpacing: 0.3,
-  },
-  input: {
-    height: 50,
-    borderColor: '#D5E1EA',
-    borderWidth: 1.5,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: '#2C3E50',
-    backgroundColor: '#F8FAFB',
-  },
-  loginButton: {
-    backgroundColor: '#4A90D9',
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
-    shadowColor: '#4A90D9',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  loginButtonText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
-  },
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 24,
-  },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#D5E1EA',
-  },
-  dividerText: {
-    marginHorizontal: 16,
-    fontSize: 14,
-    color: '#95A5A6',
-    fontWeight: '600',
-  },
-  registerButton: {
-    backgroundColor: 'transparent',
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#4A90D9',
-  },
-  registerButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#4A90D9',
-    letterSpacing: 0.3,
-  },
-  footer: {
-    marginTop: 32,
-    alignItems: 'center',
-  },
-  backText: {
-    fontSize: 16,
-    color: '#4A6B8A',
-    fontWeight: '600',
-  },
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f3f4f6' },
+  card: { width: '85%', backgroundColor: '#fff', borderRadius: 10, padding: 20, elevation: 4 },
+  title: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 },
+  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 10, marginBottom: 12 },
+  button: { backgroundColor: '#2563eb', paddingVertical: 12, borderRadius: 8, alignItems: 'center' },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  registerLink: { textAlign: 'center', color: '#2563eb', marginTop: 10 },
 });
 
 export default AdminLoginScreen;

@@ -38,11 +38,8 @@ const ProfileScreen = () => {
 
       try {
         // --- Get token and studentId from AsyncStorage in parallel ---
-        const [token, studentId] = await Promise.all([
-          AsyncStorage.getItem('studentToken'),
-          AsyncStorage.getItem('studentId'),
-        ]);
-        if (!token || !studentId) {
+        const studentId = await localStorage.getItem("studentID")
+        if ( !studentId) {
           // Handle case where token or ID is not found (e.g., user not logged in)
           setError('Authentication details not found. Please log in again.');
           setIsLoading(false);

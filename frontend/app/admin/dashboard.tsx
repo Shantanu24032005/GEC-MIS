@@ -1,5 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Dimensions, Pressable } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Animated,
+  Dimensions,
+  Pressable,
+  ScrollView,
+  RefreshControl,
+} from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 
 const SIDEBAR_WIDTH = 260;
@@ -8,42 +18,67 @@ const AdminDashboard = () => {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const translateX = useRef(new Animated.Value(-SIDEBAR_WIDTH)).current;
-  const screenWidth = Dimensions.get('window').width;
 
   // Notice state
   const [notices, setNotices] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://gec-mis-backend.onrender.com';
+
+  const fetchNotices = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${BASE_URL}/api/adminDetails/viewNotice`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setNotices(Array.isArray(data) ? data : data?.data ?? []);
+    } catch (e: any) {
+      setError(e?.message ?? 'Failed to load notices');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchNotices = async () => {
+    let isMounted = true;
+    const load = async () => {
       setLoading(true);
-      setError(null);
       try {
-        const res = await fetch('https://gec-mis-backend.onrender.com/api/adminDetails/viewNotice');
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
+        const res = await fetch(`${BASE_URL}/api/adminDetails/viewNotice`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        // Assuming API returns an array; adapt if shape differs
-        setNotices(Array.isArray(data) ? data : (data?.data ?? []));
+        if (isMounted) {
+          setNotices(Array.isArray(data) ? data : data?.data ?? []);
+        }
       } catch (e: any) {
-        setError(e?.message ?? 'Failed to load notices');
+        if (isMounted) setError(e?.message ?? 'Failed to load notices');
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
-
-    fetchNotices();
+    load();
+    return () => {
+      isMounted = false;
+    };
   }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchNotices();
+    setRefreshing(false);
+  };
 
   const toggleSidebar = () => {
     const toValue = open ? -SIDEBAR_WIDTH : 0;
+    setOpen(!open);
     Animated.timing(translateX, {
       toValue,
       duration: 250,
       useNativeDriver: true,
-    }).start(() => setOpen(!open));
+    }).start();
   };
 
   const navigate = (path: string) => {
@@ -55,7 +90,7 @@ const AdminDashboard = () => {
     <View style={styles.root}>
       <Stack.Screen options={{ title: 'Admin Dashboard' }} />
 
-      {/* Toggle Button */}
+      {/* Top bar */}
       <View style={styles.topBar}>
         <TouchableOpacity onPress={toggleSidebar} style={styles.menuButton}>
           <Text style={styles.menuButtonText}>☰</Text>
@@ -63,34 +98,46 @@ const AdminDashboard = () => {
         <Text style={styles.topBarTitle}>Admin Dashboard</Text>
       </View>
 
-      {/* Backdrop */}
-      {open && (
-        <Pressable style={styles.backdrop} onPress={toggleSidebar} />
-      )}
+      {/* Backdrop overlay */}
+      {open && <Pressable style={styles.backdrop} onPress={toggleSidebar} />}
 
-      {/* Slide-in Sidebar */}
-      <Animated.View style={[styles.sidebar, { transform: [{ translateX }] }] }>
+      {/* Sidebar */}
+      <Animated.View style={[styles.sidebar, { transform: [{ translateX }] }]}>
         <Text style={styles.sidebarTitle}>Menu</Text>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigate('/admin/addStudentDetails')}>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigate('/admin/addStudentDetails')}>
           <Text style={styles.navText}>Add Student Details</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigate('/admin/viewStudentDetails')}>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigate('/admin/viewStudentDetails')}>
           <Text style={styles.navText}>View Student Details</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigate('/admin/updateStudentDetails')}>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigate('/admin/updateStudentDetails')}>
           <Text style={styles.navText}>Update Student Details</Text>
         </TouchableOpacity>
       </Animated.View>
 
-      {/* Main content */}
-      <View style={styles.content}>
+      {/* Main Content */}
+      <ScrollView
+        style={styles.content}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
         <Text style={styles.welcome}>Welcome to the Admin Dashboard</Text>
-        <Text style={styles.helper}>Use the menu button to open the sidebar and navigate.</Text>
+        <Text style={styles.helper}>
+          Use the menu button to open the sidebar and navigate.
+        </Text>
 
         <View style={styles.noticeHeaderRow}>
           <Text style={styles.noticeHeader}>Notices</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <TouchableOpacity onPress={() => navigate('/admin/createNotice')} style={styles.createButton}>
+            <TouchableOpacity
+              onPress={() => navigate('/admin/createNotice')}
+              style={styles.createButton}>
               <Text style={styles.createButtonText}>Create Notice</Text>
             </TouchableOpacity>
             {loading && <Text style={styles.noticeMeta}>Loading...</Text>}
@@ -105,16 +152,22 @@ const AdminDashboard = () => {
           <View style={styles.noticeList}>
             {notices.map((n, idx) => (
               <View key={n._id ?? idx} style={styles.noticeCard}>
-                <Text style={styles.noticeTitle}>{n.title ?? 'Untitled Notice'}</Text>
-                {n.body ? <Text style={styles.noticeBody}>{n.body}</Text> : null}
+                <Text style={styles.noticeTitle}>
+                  {n.title ?? 'Untitled Notice'}
+                </Text>
+                {n.body ? (
+                  <Text style={styles.noticeBody}>{n.body}</Text>
+                ) : null}
                 <Text style={styles.noticeMeta}>
-                  {n.createdAt ? new Date(n.createdAt).toLocaleString() : ''}
+                  {n.createdAt
+                    ? new Date(n.createdAt).toLocaleString()
+                    : ''}
                 </Text>
               </View>
             ))}
           </View>
         )}
-      </View>
+      </ScrollView>
     </View>
   );
 };

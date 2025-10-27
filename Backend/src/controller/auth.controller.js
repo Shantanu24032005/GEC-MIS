@@ -134,18 +134,16 @@ export const login = async (req, res) => {
 
         // If user exists and password matches
         if (student && (await student.comparePassword(password))) {
-            const token = generateToken(student._id);
-
-            res.cookie('token', token, {
-                httpOnly: true,
-            });
-
+            const token = jwt.sign({ _id: student._id}, process.env.JWT_SECRET, {
+                     expiresIn: '30d',
+                  });
             res.json({
                 _id: student._id,
                 name: `${student.first_name} ${student.last_name}`,
                 email: student.email,
                 userType: 'student',
-                message: "Login successful"
+                message: "Login successful",
+                token
             });
         } else {
             // Generic message for security (don't reveal if email exists)

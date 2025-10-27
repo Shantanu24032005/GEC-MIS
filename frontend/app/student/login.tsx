@@ -46,28 +46,21 @@ const LoginScreen = () => {
         password: password
       };
 
-<<<<<<< HEAD
-      const response = await axios.post('http://localhost:3000/api/auth/login', payload, {
-=======
       // Call the login API
       const response = await axios.post('https://gec-mis-backend.onrender.com/api/auth/login', payload, {
->>>>>>> fd108ed01efd857a894ef0c3549d0095d05dc7af
         headers: {
           'Content-Type': 'application/json',
         },
       });
 
-      if (response.data && response.data.token && response.data._id) {
         try {
-          await AsyncStorage.multiSet([
-            ['studentToken', response.data.token],
-            ['studentId', response.data._id]
-          ]);
+          await localStorage.setItem("studentID",response.data._id)
+          await localStorage.setItem("token",response.data.token)
+          console.log(response.data.token)
         } catch (storageError) {
           console.error('Failed to save data to storage:', storageError);
           Alert.alert('Storage Error', 'Could not save login session. Please try again.');
         }
-      }
 
       console.log('Login successful:', response.data);
       Alert.alert('Success', 'Login successful!');
