@@ -39,6 +39,7 @@ const ProfileScreen = () => {
       try {
         // --- Get token and studentId from AsyncStorage in parallel ---
         const studentId = await localStorage.getItem("studentID")
+        const token = await localStorage.getItem('studentToken');
         if ( !studentId) {
           // Handle case where token or ID is not found (e.g., user not logged in)
           setError('Authentication details not found. Please log in again.');
@@ -51,12 +52,7 @@ const ProfileScreen = () => {
         // --- Make the request with the Authorization header ---
         // The endpoint now includes the studentId from AsyncStorage
         const response = await axios.get<ApiStudentProfile>(
-          `https://gec-mis-backend.onrender.com/api/details/profile/${studentId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`, // Include the token here
-            },
-          }
+          `https://gec-mis-backend.onrender.com/api/details/profile/${studentId}`
         );
 
         // --- Transform API data to match frontend interface ---
