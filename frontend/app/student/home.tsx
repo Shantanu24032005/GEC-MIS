@@ -28,7 +28,6 @@ const { width, height } = Dimensions.get("window");
 const sidebarMenuItems = [
   { icon: "home", name: "Home", route: "/student/home" }, // Or just "." if already on home
   { icon: "user", name: "Profile", route: "/student/profile" },
-  { icon: "book-open", name: "Registration", route: "/student/registration-status" },
   { icon: "settings", name: "Reset Password", route: "/student/reset-password" },
   { icon: "award", name: "Semester Result", route: "/student/semester-result" },
   { icon: "dollar-sign", name: "My Payments", route: "/student/payments" }, // Typo fixed
@@ -58,7 +57,7 @@ export default function HomeScreen() {
       try {
         setLoadingNotices(true);
         setNoticeError(null);
-        const response = await axios.get('http://localhost:3000/api/details/home');
+        const response = await axios.get('https://gec-mis-backend.onrender.com/api/details/home');
         // The backend returns { success: true, data: notices }
         if (response.data && Array.isArray(response.data.data)) {
           setNotices(response.data.data);
