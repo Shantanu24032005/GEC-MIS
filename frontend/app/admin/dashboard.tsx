@@ -20,7 +20,7 @@ const AdminDashboard = () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch('http://localhost:3000/api/adminDetails/viewNotice');
+        const res = await fetch('https://gec-mis-backend.onrender.com/api/adminDetails/viewNotice');
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);
         }

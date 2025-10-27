@@ -54,7 +54,7 @@ const ProfileScreen = () => {
         // --- Make the request with the Authorization header ---
         // The endpoint now includes the studentId from AsyncStorage
         const response = await axios.get<ApiStudentProfile>(
-          `http://localhost:3000/api/details/profile/${studentId}`,
+          `https://gec-mis-backend.onrender.com/api/details/profile/${studentId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`, // Include the token here

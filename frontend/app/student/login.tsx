@@ -46,7 +46,12 @@ const LoginScreen = () => {
         password: password
       };
 
+<<<<<<< HEAD
       const response = await axios.post('http://localhost:3000/api/auth/login', payload, {
+=======
+      // Call the login API
+      const response = await axios.post('https://gec-mis-backend.onrender.com/api/auth/login', payload, {
+>>>>>>> fd108ed01efd857a894ef0c3549d0095d05dc7af
         headers: {
           'Content-Type': 'application/json',
         },

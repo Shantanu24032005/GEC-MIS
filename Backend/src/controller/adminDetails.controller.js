@@ -278,7 +278,7 @@ export const updateStudentDetails = async (req, res, next) => {
         // Optional: Find student if roll_no provided, to ensure IDs belong to them
         let student;
         if (roll_no) {
-            student = await Student.findOne({ roll_no });
+            student = await Student.findOne({ roll_number:roll_no });
              if (!student) {
                 return res.status(404).json({
                     success: false,

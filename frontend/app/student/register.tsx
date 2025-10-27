@@ -120,8 +120,15 @@ const RegisterScreen = () => {
     }
 
     try {
+<<<<<<< HEAD
       const response = await axios.post('http://localhost:3000/api/auth/register', formData, {
         headers: {},
+=======
+      // Make the API call with FormData
+      const response = await axios.post('https://gec-mis-backend.onrender.com/api/auth/register', formData, {
+        headers: {
+        },
+>>>>>>> fd108ed01efd857a894ef0c3549d0095d05dc7af
       });
 
       console.log('Registration successful:', response.data);

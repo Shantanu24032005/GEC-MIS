@@ -39,9 +39,13 @@ const AdminLoginScreen = () => {
     };
 
     try {
+<<<<<<< HEAD
       const response = await axios.post('http://localhost:3000/api/adminauth/adminLogin', payload, {
         headers: { 'Content-Type': 'application/json' },
       });
+=======
+      const response = await axios.post('https://gec-mis-backend.onrender.com/api/adminauth/adminLogin',payload,{headers:{'Content-Type':'application/json',},});
+>>>>>>> fd108ed01efd857a894ef0c3549d0095d05dc7af
 
       if (response.data && response.data.admin) {
         await AsyncStorage.setItem('adminData', JSON.stringify(response.data.admin));
