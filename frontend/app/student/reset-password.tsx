@@ -49,10 +49,7 @@ export default function ResetPasswordScreen() {
     try {
       // 1. Get the auth token from storage
       const token = await AsyncStorage.getItem('studentToken');
-      if (!token) {
-        throw new Error('Authentication token not found. Please log in again.');
-      }
-
+      const studentId=await AsyncStorage.getItem("studentID");
       // 2. Construct the correct URL with studentId as a parameter
       const apiUrl = `https://gec-mis-backend.onrender.com/api/details/resetpassword/${studentId}`;
 

@@ -71,7 +71,7 @@ export default function PaymentsScreen() {
             onPress={() => router.push('/exam-fees')}
           >
             <Text style={styles.sectionTitle}>Tuition Fee Payments</Text>
-            <Feather name="arrow-right" size={20} color="#34495E" />
+    
           </TouchableOpacity>
 
           {loading && (

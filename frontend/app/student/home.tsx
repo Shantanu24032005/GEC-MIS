@@ -22,6 +22,7 @@ import {
   ActivityIndicator,
   ImageBackground
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width, height } = Dimensions.get("window");
 
@@ -72,8 +73,8 @@ export default function HomeScreen() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("studentID");
+    AsyncStorage.removeItem("token");
+    AsyncStorage.removeItem("studentID");
     toggleSidebar(false);
     // CORRECTED: Changed absolute path to relative route
     router.push("/student/login");
@@ -130,10 +131,7 @@ export default function HomeScreen() {
               <View style={styles.profileInfoWrapper}>
                 {/* CORRECTED: Use relative route name */}
                 <TouchableOpacity onPress={() => handleMenuItemPress('profile')}>
-                  <Image
-                    source={{ uri: "https://placehold.co/100x100/E57373/FFFFFF?text=DS" }}
-                    style={styles.profilePic}
-                  />
+                  
                 </TouchableOpacity>
               </View>
             </ImageBackground>
@@ -259,41 +257,6 @@ export default function HomeScreen() {
               </ImageBackground>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.admissionCard}
-              // CORRECTED: Changed absolute path to relative route
-              onPress={() => router.push("/student/me-admision")}
-            >
-              <ImageBackground
-                source={{
-                  uri: "https://placehold.co/600x200/CCCCCC/FFFFFF?text=Campus",
-                }}
-                style={styles.cardBackground}
-                imageStyle={{ borderRadius: 12 }}
-              >
-                <View
-                  style={[
-                    styles.cardOverlay,
-                    { backgroundColor: "rgba(102, 187, 106, 0.85)" },
-                  ]}
-                />
-                <View style={styles.cardContent}>
-                  <Image
-                    // CORRECTED: Changed path from ../assets to ../../assets
-                    source={require("../../assets/gec-seal.png")}
-                    style={styles.cardLogo}
-                  />
-                  <View style={styles.cardTextContainer}>
-                    <Text style={styles.cardTitle}>GEC M.E ADMISSION</Text>
-                    <Text style={styles.cardSubtitle}>2025-26</Text>
-                  </View>
-                  <View style={styles.visitButton}>
-                    <Text style={styles.visitButtonText}>Visit</Text>
-                    <Feather name="chevron-right" size={16} color="#FFFFFF" />
-                  </View>
-                </View>
-              </ImageBackground>
-            </TouchableOpacity>
           </View>
 
           {/* Notices Section */}
@@ -311,7 +274,6 @@ export default function HomeScreen() {
                   <TouchableOpacity
                     key={notice._id}
                     style={styles.noticeCard}
-                    onPress={() => handleNoticePress(notice)}
                   >
                     <View style={styles.noticeHeader}>
                       <Text style={styles.noticeTitle}>{notice.title}</Text>

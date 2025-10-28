@@ -13,6 +13,20 @@ import {
 import { Stack } from 'expo-router';
 import axios from 'axios';
 
+/**
+ * Parses a string value into a number, checking for invalid input.
+ * Returns a default value (like undefined or null) if the input is empty or NaN.
+ */
+const parseNumeric = (value, defaultVal = undefined) => {
+  // If value is empty, null, or undefined, return the default
+  if (value === null || value === undefined || String(value).trim() === '') {
+    return defaultVal;
+  }
+  const num = parseFloat(value);
+  // If parsing fails (e.g., "abc"), return default. Otherwise, return the number.
+  return isNaN(num) ? defaultVal : num;
+};
+
 const AddStudentDetails = () => {
   const [formData, setFormData] = useState({
     roll_no: '',
@@ -38,26 +52,37 @@ const AddStudentDetails = () => {
     ],
   });
 
-  // same logic — unchanged
   const handleSubmit = async () => {
     try {
       if (!formData.roll_no) {
         Alert.alert('Error', 'Roll number is required');
         return;
       }
-      
+
+      // 1. Filter out empty courses and map valid ones
+      const validCourses = formData.courses
+        .filter(
+          (course) =>
+            course.course_code.trim() !== '' && course.course_name.trim() !== ''
+        )
+        .map((course) => ({
+          ...course,
+          // Use parseNumeric to safely convert, defaulting to null
+          internal_marks: parseNumeric(course.internal_marks, null),
+          term_work_marks: parseNumeric(course.term_work_marks, null),
+          end_sem_exam_marks: parseNumeric(course.end_sem_exam_marks, null),
+        }));
+
+      // 2. Create the final data payload using parseNumeric
       const dataToSend = {
         ...formData,
-        amount: formData.amount ? Number(formData.amount) : undefined,
-        semester: formData.semester ? Number(formData.semester) : undefined,
-        cgpa: formData.cgpa ? Number(formData.cgpa) : undefined,
-        courses: formData.courses.map((course) => ({
-          ...course,
-          internal_marks: course.internal_marks ? Number(course.internal_marks) : null,
-          term_work_marks: course.term_work_marks ? Number(course.term_work_marks) : null,
-          end_sem_exam_marks: course.end_sem_exam_marks ? Number(course.end_sem_exam_marks) : null,
-        })),
+        amount: parseNumeric(formData.amount, undefined),
+        semester: parseNumeric(formData.semester, undefined),
+        cgpa: parseNumeric(formData.cgpa, undefined),
+        courses: validCourses, // Use the new filtered/mapped array
       };
+
+      console.log('Sending data:', JSON.stringify(dataToSend, null, 2));
 
       const response = await axios.post(
         'https://gec-mis-backend.onrender.com/api/adminDetails/addStudentDetails',
@@ -66,6 +91,7 @@ const AddStudentDetails = () => {
 
       if (response.data.success) {
         Alert.alert('Success', 'Student details added successfully');
+        // Reset form
         setFormData({
           roll_no: '',
           amount: '',
@@ -91,21 +117,40 @@ const AddStudentDetails = () => {
         });
       }
     } catch (error) {
+      // 3. Enhanced error catch block
       console.error('Error adding student details:', error);
-      Alert.alert('Error', 'Failed to add student details');
+
+      let errorMessage = 'Failed to add student details.';
+
+      if (error.response) {
+        // The server responded with an error status (4xx, 5xx)
+        console.error('Backend Error Data:', error.response.data);
+        // Get the specific message from your backend
+        errorMessage = `Error: ${
+          error.response.data.message || 'Server rejected the data.'
+        } (Status: ${error.response.status})`;
+      } else if (error.request) {
+        // The request was made but no response was received
+        errorMessage = 'No response from server. Check your connection.';
+      } else {
+        // Something else happened
+        errorMessage = `An error occurred: ${error.message}`;
+      }
+
+      Alert.alert('Error', errorMessage);
     }
   };
 
-  // unchanged
-  const handleInputChange = (field: string, value: string) => {
+  // same logic — unchanged
+  const handleInputChange = (field, value) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
-  // unchanged
-  const handleCourseChange = (index: number, field: string, value: string) => {
+  // same logic — unchanged
+  const handleCourseChange = (index, field, value) => {
     setFormData((prev) => {
       const newCourses = [...prev.courses];
       newCourses[index] = {
@@ -119,7 +164,7 @@ const AddStudentDetails = () => {
     });
   };
 
-  // unchanged
+  // same logic — unchanged
   const addCourse = () => {
     setFormData((prev) => ({
       ...prev,
@@ -140,7 +185,7 @@ const AddStudentDetails = () => {
   return (
     <KeyboardAvoidingView
       style={styles.root}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'position'}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'} // Use 'height' for Android
       keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
       <ScrollView
@@ -243,26 +288,34 @@ const AddStudentDetails = () => {
                 style={styles.input}
                 placeholder="Course Code"
                 value={course.course_code}
-                onChangeText={(value) => handleCourseChange(index, 'course_code', value)}
+                onChangeText={(value) =>
+                  handleCourseChange(index, 'course_code', value)
+                }
               />
               <TextInput
                 style={styles.input}
                 placeholder="Course Name"
                 value={course.course_name}
-                onChangeText={(value) => handleCourseChange(index, 'course_name', value)}
+                onChangeText={(value) =>
+                  handleCourseChange(index, 'course_name', value)
+                }
               />
               <TextInput
                 style={styles.input}
                 placeholder="Internal Marks"
                 value={course.internal_marks}
-                onChangeText={(value) => handleCourseChange(index, 'internal_marks', value)}
+                onChangeText={(value) =>
+                  handleCourseChange(index, 'internal_marks', value)
+                }
                 keyboardType="numeric"
               />
               <TextInput
                 style={styles.input}
                 placeholder="Term Work Marks"
                 value={course.term_work_marks}
-                onChangeText={(value) => handleCourseChange(index, 'term_work_marks', value)}
+                onChangeText={(value) =>
+                  handleCourseChange(index, 'term_work_marks', value)
+                }
                 keyboardType="numeric"
               />
               <TextInput
@@ -278,7 +331,9 @@ const AddStudentDetails = () => {
                 style={styles.input}
                 placeholder="Grade"
                 value={course.grade}
-                onChangeText={(value) => handleCourseChange(index, 'grade', value)}
+                onChangeText={(value) =>
+                  handleCourseChange(index, 'grade', value)
+                }
               />
             </View>
           ))}
