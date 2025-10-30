@@ -6,15 +6,18 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "projectDir": "frontend"
     },
     "preview": {
       "distribution": "internal",
       "android": {
         "buildType": "apk"
-      }
+      },
+      "projectDir": "frontend"
     },
     "production": {
+      "projectDir": "frontend",
       "autoIncrement": true
     }
   },
