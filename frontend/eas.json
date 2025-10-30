@@ -12,11 +12,9 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
-      },
-      "projectDir": "frontend"
+      }
     },
     "production": {
-      "projectDir": "frontend",
       "autoIncrement": true
     }
   },
